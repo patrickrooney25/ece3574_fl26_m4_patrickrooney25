@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QMainWindow>
+#include <thread>
+#include <atomic>
+#include <memory>
 
 #include "aiws/processing_core.hpp"
 #include "aiws/workspace.hpp"

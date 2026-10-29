@@ -199,6 +199,16 @@ student_tests_autogen/timestamp: /mnt/CMakeLists.txt \
   /usr/share/cmake-3.28/Modules/Platform/Linux.cmake \
   /usr/share/cmake-3.28/Modules/Platform/UnixPaths.cmake
 
+CMakeFiles/student_tests.dir/student_tests_autogen/mocs_compilation.cpp.o: student_tests_autogen/mocs_compilation.cpp \
+  /usr/include/stdc-predef.h
+
+CMakeFiles/student_tests.dir/tests/student_tests.cpp.o: /mnt/tests/student_tests.cpp \
+  /usr/include/stdc-predef.h
+
+
+/usr/include/stdc-predef.h:
+
+student_tests_autogen/mocs_compilation.cpp:
 
 /usr/share/cmake-3.28/Modules/Platform/Linux-Initialize.cmake:
 

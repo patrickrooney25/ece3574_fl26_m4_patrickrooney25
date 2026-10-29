@@ -179,6 +179,33 @@ void MainWindow::add_document() {
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
 }
 
+bool MainWindow::add_document_file(const QString& path){
+    std::ifstream file(path.toStdString());
+    if (!file.is_open()){
+        return false;
+    }
+
+    std::stringstream buffer;
+    buffer <<file.rdbuf();
+
+    QFileInfo file_info(path);
+    std::string doc_id = file_info.fileName().toStdString();
+    std::string doc_title = file_info.baseName().toStdString();
+    std::string doc_text = buffer.str();
+
+    Document doc(doc_id, doc_title, doc_text);
+    workspace_.add_document(std::move(doc));
+
+    workspace_widget_->add_document(QString::fromStdString(doc_id));
+    invalidate_corpus();
+    status_label_->setText("Added document: " +QString::fromStdString(doc_id));
+    return true;
+}
+
+void MainWindow::set_build_delay_ms(int ms_per_document){
+    build_delay_ms_ = ms_per_document;
+}
+
 void MainWindow::build_corpus() {
     if (workspace_.documents().empty()) {
         return;
@@ -309,21 +336,6 @@ void MainWindow::clear_processing_outputs() {
     search_widget_->clear_results();
     term_inspector_widget_->clear_statistics();
     context_widget_->clear_context();
-}
-
-bool MainWindow::add_document_file(const QString& path) {
-    // Basic stub: reuse M3 document adding logic or slot
-    // Return true on success, false if file cannot be read
-    QFile file(path);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        return false;
-    }
-    // TODO: load into workspace_ and update workspace_widget_
-    return true;
-}
-
-void MainWindow::set_build_delay_ms(int ms_per_document) {
-    build_delay_ms_ = ms_per_document;
 }
 
 }  // namespace aiws::gui

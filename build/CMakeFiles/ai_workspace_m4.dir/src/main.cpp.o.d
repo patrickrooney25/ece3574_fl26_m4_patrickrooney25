@@ -335,6 +335,8 @@ CMakeFiles/ai_workspace_m4.dir/src/main.cpp.o: /mnt/src/main.cpp \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qcursor.h \
  /usr/include/x86_64-linux-gnu/qt6/QtGui/qbitmap.h \
  /usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtabwidget.h \
+ /usr/include/c++/13/thread /usr/include/c++/13/bits/std_thread.h \
+ /usr/include/c++/13/bits/this_thread_sleep.h \
  /mnt/include/aiws/processing_core.hpp \
  /mnt/include/aiws/chunking_strategy.hpp /mnt/include/aiws/document.hpp \
  /mnt/include/aiws/processing_types.hpp \
