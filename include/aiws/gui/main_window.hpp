@@ -154,6 +154,7 @@ private:
     QLabel* status_label_{nullptr};
     QPushButton* reset_button_{nullptr};
     QPushButton* exit_button_{nullptr};
+    int build_delay_ms_{0};
 };
 
 }  // namespace aiws::gui
