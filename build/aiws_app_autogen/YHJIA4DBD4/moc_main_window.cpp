@@ -26,7 +26,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 namespace {
 struct qt_meta_stringdata_aiws__gui__MainWindow_t {
-    uint offsetsAndSizes[38];
+    uint offsetsAndSizes[52];
     char stringdata0[22];
     char stringdata1[13];
     char stringdata2[1];
@@ -46,6 +46,13 @@ struct qt_meta_stringdata_aiws__gui__MainWindow_t {
     char stringdata16[9];
     char stringdata17[18];
     char stringdata18[17];
+    char stringdata19[19];
+    char stringdata20[22];
+    char stringdata21[9];
+    char stringdata22[9];
+    char stringdata23[11];
+    char stringdata24[8];
+    char stringdata25[14];
 };
 #define QT_MOC_LITERAL(ofs, len) \
     uint(sizeof(qt_meta_stringdata_aiws__gui__MainWindow_t::offsetsAndSizes) + ofs), len 
@@ -69,7 +76,14 @@ Q_CONSTINIT static const qt_meta_stringdata_aiws__gui__MainWindow_t qt_meta_stri
         QT_MOC_LITERAL(211, 4),  // "term"
         QT_MOC_LITERAL(216, 8),  // "chunk_id"
         QT_MOC_LITERAL(225, 17),  // "reset_application"
-        QT_MOC_LITERAL(243, 16)   // "exit_application"
+        QT_MOC_LITERAL(243, 16),  // "exit_application"
+        QT_MOC_LITERAL(260, 18),  // "on_build_completed"
+        QT_MOC_LITERAL(279, 21),  // "aiws::ProcessingCore*"
+        QT_MOC_LITERAL(301, 8),  // "new_core"
+        QT_MOC_LITERAL(310, 8),  // "uint64_t"
+        QT_MOC_LITERAL(319, 10),  // "generation"
+        QT_MOC_LITERAL(330, 7),  // "success"
+        QT_MOC_LITERAL(338, 13)   // "error_message"
     },
     "aiws::gui::MainWindow",
     "add_document",
@@ -89,7 +103,14 @@ Q_CONSTINIT static const qt_meta_stringdata_aiws__gui__MainWindow_t qt_meta_stri
     "term",
     "chunk_id",
     "reset_application",
-    "exit_application"
+    "exit_application",
+    "on_build_completed",
+    "aiws::ProcessingCore*",
+    "new_core",
+    "uint64_t",
+    "generation",
+    "success",
+    "error_message"
 };
 #undef QT_MOC_LITERAL
 } // unnamed namespace
@@ -100,7 +121,7 @@ Q_CONSTINIT static const uint qt_meta_data_aiws__gui__MainWindow[] = {
       10,       // revision
        0,       // classname
        0,    0, // classinfo
-      10,   14, // methods
+      11,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -108,16 +129,17 @@ Q_CONSTINIT static const uint qt_meta_data_aiws__gui__MainWindow[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags, initial metatype offsets
-       1,    0,   74,    2, 0x08,    1 /* Private */,
-       3,    0,   75,    2, 0x08,    2 /* Private */,
-       4,    1,   76,    2, 0x08,    3 /* Private */,
-       6,    2,   79,    2, 0x08,    5 /* Private */,
-       9,    1,   84,    2, 0x08,    8 /* Private */,
-      10,    1,   87,    2, 0x08,   10 /* Private */,
-      12,    1,   90,    2, 0x08,   12 /* Private */,
-      14,    2,   93,    2, 0x08,   14 /* Private */,
-      17,    0,   98,    2, 0x08,   17 /* Private */,
-      18,    0,   99,    2, 0x08,   18 /* Private */,
+       1,    0,   80,    2, 0x08,    1 /* Private */,
+       3,    0,   81,    2, 0x08,    2 /* Private */,
+       4,    1,   82,    2, 0x08,    3 /* Private */,
+       6,    2,   85,    2, 0x08,    5 /* Private */,
+       9,    1,   90,    2, 0x08,    8 /* Private */,
+      10,    1,   93,    2, 0x08,   10 /* Private */,
+      12,    1,   96,    2, 0x08,   12 /* Private */,
+      14,    2,   99,    2, 0x08,   14 /* Private */,
+      17,    0,  104,    2, 0x08,   17 /* Private */,
+      18,    0,  105,    2, 0x08,   18 /* Private */,
+      19,    4,  106,    2, 0x08,   19 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -130,6 +152,7 @@ Q_CONSTINIT static const uint qt_meta_data_aiws__gui__MainWindow[] = {
     QMetaType::Void, QMetaType::QString, QMetaType::QString,   15,   16,
     QMetaType::Void,
     QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 20, 0x80000000 | 22, QMetaType::Bool, QMetaType::QString,   21,   23,   24,   25,
 
        0        // eod
 };
@@ -170,7 +193,13 @@ Q_CONSTINIT const QMetaObject aiws::gui::MainWindow::staticMetaObject = { {
         // method 'reset_application'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'exit_application'
-        QtPrivate::TypeAndForceComplete<void, std::false_type>
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        // method 'on_build_completed'
+        QtPrivate::TypeAndForceComplete<void, std::false_type>,
+        QtPrivate::TypeAndForceComplete<aiws::ProcessingCore *, std::false_type>,
+        QtPrivate::TypeAndForceComplete<uint64_t, std::false_type>,
+        QtPrivate::TypeAndForceComplete<bool, std::false_type>,
+        QtPrivate::TypeAndForceComplete<const QString &, std::false_type>
     >,
     nullptr
 } };
@@ -191,6 +220,7 @@ void aiws::gui::MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c
         case 7: _t->term_inspection_requested((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
         case 8: _t->reset_application(); break;
         case 9: _t->exit_application(); break;
+        case 10: _t->on_build_completed((*reinterpret_cast< std::add_pointer_t<aiws::ProcessingCore*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<uint64_t>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[4]))); break;
         default: ;
         }
     }
@@ -215,13 +245,13 @@ int aiws::gui::MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 11)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 11;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 11)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 10;
+        _id -= 11;
     }
     return _id;
 }

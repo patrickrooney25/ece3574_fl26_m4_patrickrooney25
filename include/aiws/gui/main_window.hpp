@@ -4,6 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <memory>
+#include <cstdint>
 
 #include "aiws/processing_core.hpp"
 #include "aiws/workspace.hpp"
@@ -46,6 +47,8 @@ public:
      * @param parent Optional Qt parent widget.
      */
     explicit MainWindow(QWidget* parent = nullptr);
+
+    ~MainWindow() override;
 
     /**
      * @brief Registers the callback invoked when the user requests Exit.
@@ -126,6 +129,9 @@ private slots:
      */
     void exit_application();
 
+    void on_build_completed(aiws::ProcessingCore* new_core, uint64_t generation, bool success, const QString& error_message);
+
+
 private:
     /**
      * @brief Updates availability of actions that depend on current application state.
@@ -158,6 +164,8 @@ private:
     QPushButton* reset_button_{nullptr};
     QPushButton* exit_button_{nullptr};
     int build_delay_ms_{0};
+    std::thread worker_thread_;
+    std::atomic<uint64_t> current_generation_{0};
 };
 
 }  // namespace aiws::gui

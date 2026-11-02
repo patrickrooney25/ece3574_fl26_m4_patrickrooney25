@@ -14,6 +14,7 @@
 #include <QSplitter>
 #include <QWidget>
 #include <QFrame>
+#include <chrono>
 
 #include <fstream>
 #include <sstream>
@@ -146,6 +147,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     reset_application();
 }
 
+MainWindow::~MainWindow() {
+    if(worker_thread_.joinable()) {
+        worker_thread_.join();
+    }
+}
+
 void MainWindow::set_exit_callback(ExitCallback callback) noexcept {
     exit_callback_=callback;
 }
@@ -210,16 +217,45 @@ void MainWindow::build_corpus() {
     if (workspace_.documents().empty()) {
         return;
     }
-    processing_core_.rebuild(workspace_);
-    corpus_current_=true;
 
-    const std::size_t total_chunks = processing_core_.chunk_count();
-    workspace_widget_->set_corpus_status(QString("Corpus: <b>Ready - %1 chunks</b>").arg(total_chunks));
+    if (worker_thread_.joinable()) { //join build thread before launching another
+        worker_thread_.join();
+    }
 
-    clear_processing_outputs();
+    const uint64_t build_gen = current_generation_++; //snapshot workspace
+    Workspace snapshot = workspace_;
+    const int delay = build_delay_ms_;
+
+    //update UI to building
+    workspace_widget_->set_corpus_status("Corpus: <b>Building...</b>");
+    status_label_->setText("<b>Current status:</b> Building corpus...");
     update_action_states();
-    status_label_->setText(QString("<b> Current status:</b> Corpus built succesfully."));
-    
+
+    //launch background worker thread
+    worker_thread_ = std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
+        auto* core = new aiws::ProcessingCore();
+        bool success = true;
+        QString error_msg;
+
+        try{
+            if (delay>0){
+                for (std::size_t i=0; i<snapshot.documents().size(); i++){
+                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+                }
+            }
+            core->rebuild(snapshot);
+        }catch(const std::exception& e){
+            success =false;
+            error_msg=QString::fromStdString(e.what());
+        }catch(...){
+            success=false;
+            error_msg="Unkown build failure.";
+        }
+
+        QMetaObject::invokeMethod(this, [this, core, build_gen, success, error_msg](){
+            on_build_completed(core, build_gen, success, error_msg);
+        });
+    });
 }
 
 
@@ -290,8 +326,13 @@ void MainWindow::term_inspection_requested(const QString& term,
 }
 
 void MainWindow::reset_application() {
+    if(worker_thread_.joinable()) {
+        worker_thread_.join();
+    }
+    
     workspace_.clear();
     corpus_current_ = false;
+    current_generation_++;
 
     workspace_widget_->reset();
     context_widget_->reset();
@@ -306,6 +347,9 @@ void MainWindow::reset_application() {
 void MainWindow::exit_application() {
     auto reply = QMessageBox::question(this, "Exit", "Are you sure you want to exit?");
     if(reply== QMessageBox::Yes) {
+        if(worker_thread_.joinable()) {
+            worker_thread_.join();
+        }
         if(exit_callback_!=nullptr) {
             exit_callback_(this);
         }
@@ -327,6 +371,7 @@ void MainWindow::update_action_states() {
 
 void MainWindow::invalidate_corpus() {
     corpus_current_=false;
+    current_generation_++;
     workspace_widget_->set_corpus_status("Corpus: <b> Rebuild Required</b>");
     clear_processing_outputs();
     update_action_states();
@@ -336,6 +381,39 @@ void MainWindow::clear_processing_outputs() {
     search_widget_->clear_results();
     term_inspector_widget_->clear_statistics();
     context_widget_->clear_context();
+}
+
+void MainWindow::on_build_completed(aiws::ProcessingCore* new_core, uint64_t generation, bool success, const QString& error_message){
+    std::unique_ptr<aiws::ProcessingCore> core_ptr(new_core);
+
+#ifndef AIWS_FAULT_LOSE_FAILURE
+    if(!success){
+        status_label_->setText(QString("<b>Current status:</b> Build failed: %1").arg(error_message));
+        workspace_widget_->set_corpus_status("Corpus: <b>Build failed</b>");
+        update_action_states();
+        return;
+    }
+#else
+    if(!sucess){
+        return;
+    }
+#endif
+
+#ifndef AIWS_FAULT_ACCEPT_STALE //drop completion if newer mutation happened mid build
+    if(generation != current_generation_){
+        return;
+    }
+#endif
+
+    //move built core into active member
+    processing_core_ = std::move(*core_ptr);
+    corpus_current_ = true;
+    const std::size_t total_chunks = processing_core_.chunk_count();
+    workspace_widget_->set_corpus_status(QString("Corpus <b>Ready - %1 chunks</b>").arg(total_chunks));
+    clear_processing_outputs();
+    update_action_states();
+    status_label_->setText("<b>Current status:</b> Corpus built successfully.");
+
 }
 
 }  // namespace aiws::gui
