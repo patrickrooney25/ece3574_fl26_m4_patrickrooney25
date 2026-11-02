@@ -66,6 +66,7 @@ CMAKE_BINARY_DIR = /mnt/build
 all: CMakeFiles/aiws_m2.dir/all
 all: CMakeFiles/aiws_app.dir/all
 all: CMakeFiles/ai_workspace_m4.dir/all
+all: CMakeFiles/aiws_send.dir/all
 all: CMakeFiles/student_tests.dir/all
 .PHONY : all
 
@@ -77,6 +78,7 @@ preinstall:
 clean: CMakeFiles/aiws_m2.dir/clean
 clean: CMakeFiles/aiws_app.dir/clean
 clean: CMakeFiles/ai_workspace_m4.dir/clean
+clean: CMakeFiles/aiws_send.dir/clean
 clean: CMakeFiles/student_tests.dir/clean
 clean: CMakeFiles/aiws_m2_autogen_timestamp_deps.dir/clean
 clean: CMakeFiles/aiws_m2_autogen.dir/clean
@@ -84,6 +86,8 @@ clean: CMakeFiles/aiws_app_autogen_timestamp_deps.dir/clean
 clean: CMakeFiles/aiws_app_autogen.dir/clean
 clean: CMakeFiles/ai_workspace_m4_autogen_timestamp_deps.dir/clean
 clean: CMakeFiles/ai_workspace_m4_autogen.dir/clean
+clean: CMakeFiles/aiws_send_autogen_timestamp_deps.dir/clean
+clean: CMakeFiles/aiws_send_autogen.dir/clean
 clean: CMakeFiles/student_tests_autogen_timestamp_deps.dir/clean
 clean: CMakeFiles/student_tests_autogen.dir/clean
 .PHONY : clean
@@ -173,6 +177,33 @@ CMakeFiles/ai_workspace_m4.dir/clean:
 .PHONY : CMakeFiles/ai_workspace_m4.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/aiws_send.dir
+
+# All Build rule for target.
+CMakeFiles/aiws_send.dir/all: CMakeFiles/aiws_send_autogen_timestamp_deps.dir/all
+CMakeFiles/aiws_send.dir/all: CMakeFiles/aiws_send_autogen.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=28,29,30,31 "Built target aiws_send"
+.PHONY : CMakeFiles/aiws_send.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/aiws_send.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 5
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/aiws_send.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 0
+.PHONY : CMakeFiles/aiws_send.dir/rule
+
+# Convenience name for target.
+aiws_send: CMakeFiles/aiws_send.dir/rule
+.PHONY : aiws_send
+
+# clean rule for target.
+CMakeFiles/aiws_send.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/clean
+.PHONY : CMakeFiles/aiws_send.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/student_tests.dir
 
 # All Build rule for target.
@@ -182,7 +213,7 @@ CMakeFiles/student_tests.dir/all: CMakeFiles/student_tests_autogen_timestamp_dep
 CMakeFiles/student_tests.dir/all: CMakeFiles/student_tests_autogen.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/student_tests.dir/build.make CMakeFiles/student_tests.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/student_tests.dir/build.make CMakeFiles/student_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=28,29,30,31 "Built target student_tests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=33,34,35,36 "Built target student_tests"
 .PHONY : CMakeFiles/student_tests.dir/all
 
 # Build rule for subdir invocation for target.
@@ -358,6 +389,58 @@ CMakeFiles/ai_workspace_m4_autogen.dir/clean:
 .PHONY : CMakeFiles/ai_workspace_m4_autogen.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/aiws_send_autogen_timestamp_deps.dir
+
+# All Build rule for target.
+CMakeFiles/aiws_send_autogen_timestamp_deps.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build.make CMakeFiles/aiws_send_autogen_timestamp_deps.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build.make CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num= "Built target aiws_send_autogen_timestamp_deps"
+.PHONY : CMakeFiles/aiws_send_autogen_timestamp_deps.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/aiws_send_autogen_timestamp_deps.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 0
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/aiws_send_autogen_timestamp_deps.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 0
+.PHONY : CMakeFiles/aiws_send_autogen_timestamp_deps.dir/rule
+
+# Convenience name for target.
+aiws_send_autogen_timestamp_deps: CMakeFiles/aiws_send_autogen_timestamp_deps.dir/rule
+.PHONY : aiws_send_autogen_timestamp_deps
+
+# clean rule for target.
+CMakeFiles/aiws_send_autogen_timestamp_deps.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build.make CMakeFiles/aiws_send_autogen_timestamp_deps.dir/clean
+.PHONY : CMakeFiles/aiws_send_autogen_timestamp_deps.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/aiws_send_autogen.dir
+
+# All Build rule for target.
+CMakeFiles/aiws_send_autogen.dir/all: CMakeFiles/aiws_send_autogen_timestamp_deps.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen.dir/build.make CMakeFiles/aiws_send_autogen.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen.dir/build.make CMakeFiles/aiws_send_autogen.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=32 "Built target aiws_send_autogen"
+.PHONY : CMakeFiles/aiws_send_autogen.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/aiws_send_autogen.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 1
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/aiws_send_autogen.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/build/CMakeFiles 0
+.PHONY : CMakeFiles/aiws_send_autogen.dir/rule
+
+# Convenience name for target.
+aiws_send_autogen: CMakeFiles/aiws_send_autogen.dir/rule
+.PHONY : aiws_send_autogen
+
+# clean rule for target.
+CMakeFiles/aiws_send_autogen.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen.dir/build.make CMakeFiles/aiws_send_autogen.dir/clean
+.PHONY : CMakeFiles/aiws_send_autogen.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/student_tests_autogen_timestamp_deps.dir
 
 # All Build rule for target.
@@ -390,7 +473,7 @@ CMakeFiles/student_tests_autogen_timestamp_deps.dir/clean:
 CMakeFiles/student_tests_autogen.dir/all: CMakeFiles/student_tests_autogen_timestamp_deps.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/student_tests_autogen.dir/build.make CMakeFiles/student_tests_autogen.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/student_tests_autogen.dir/build.make CMakeFiles/student_tests_autogen.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=32 "Built target student_tests_autogen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/build/CMakeFiles --progress-num=37 "Built target student_tests_autogen"
 .PHONY : CMakeFiles/student_tests_autogen.dir/all
 
 # Build rule for subdir invocation for target.

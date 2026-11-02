@@ -166,6 +166,19 @@ ai_workspace_m4/fast:
 .PHONY : ai_workspace_m4/fast
 
 #=============================================================================
+# Target rules for targets named aiws_send
+
+# Build rule for target.
+aiws_send: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 aiws_send
+.PHONY : aiws_send
+
+# fast build rule for target.
+aiws_send/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/build
+.PHONY : aiws_send/fast
+
+#=============================================================================
 # Target rules for targets named student_tests
 
 # Build rule for target.
@@ -255,6 +268,32 @@ ai_workspace_m4_autogen: cmake_check_build_system
 ai_workspace_m4_autogen/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/ai_workspace_m4_autogen.dir/build.make CMakeFiles/ai_workspace_m4_autogen.dir/build
 .PHONY : ai_workspace_m4_autogen/fast
+
+#=============================================================================
+# Target rules for targets named aiws_send_autogen_timestamp_deps
+
+# Build rule for target.
+aiws_send_autogen_timestamp_deps: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 aiws_send_autogen_timestamp_deps
+.PHONY : aiws_send_autogen_timestamp_deps
+
+# fast build rule for target.
+aiws_send_autogen_timestamp_deps/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build.make CMakeFiles/aiws_send_autogen_timestamp_deps.dir/build
+.PHONY : aiws_send_autogen_timestamp_deps/fast
+
+#=============================================================================
+# Target rules for targets named aiws_send_autogen
+
+# Build rule for target.
+aiws_send_autogen: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 aiws_send_autogen
+.PHONY : aiws_send_autogen
+
+# fast build rule for target.
+aiws_send_autogen/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send_autogen.dir/build.make CMakeFiles/aiws_send_autogen.dir/build
+.PHONY : aiws_send_autogen/fast
 
 #=============================================================================
 # Target rules for targets named student_tests_autogen_timestamp_deps
@@ -353,6 +392,30 @@ aiws_m2_autogen/mocs_compilation.s: aiws_m2_autogen/mocs_compilation.cpp.s
 aiws_m2_autogen/mocs_compilation.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_m2.dir/build.make CMakeFiles/aiws_m2.dir/aiws_m2_autogen/mocs_compilation.cpp.s
 .PHONY : aiws_m2_autogen/mocs_compilation.cpp.s
+
+aiws_send_autogen/mocs_compilation.o: aiws_send_autogen/mocs_compilation.cpp.o
+.PHONY : aiws_send_autogen/mocs_compilation.o
+
+# target to build an object file
+aiws_send_autogen/mocs_compilation.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/aiws_send_autogen/mocs_compilation.cpp.o
+.PHONY : aiws_send_autogen/mocs_compilation.cpp.o
+
+aiws_send_autogen/mocs_compilation.i: aiws_send_autogen/mocs_compilation.cpp.i
+.PHONY : aiws_send_autogen/mocs_compilation.i
+
+# target to preprocess a source file
+aiws_send_autogen/mocs_compilation.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/aiws_send_autogen/mocs_compilation.cpp.i
+.PHONY : aiws_send_autogen/mocs_compilation.cpp.i
+
+aiws_send_autogen/mocs_compilation.s: aiws_send_autogen/mocs_compilation.cpp.s
+.PHONY : aiws_send_autogen/mocs_compilation.s
+
+# target to generate assembly for a file
+aiws_send_autogen/mocs_compilation.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/aiws_send_autogen/mocs_compilation.cpp.s
+.PHONY : aiws_send_autogen/mocs_compilation.cpp.s
 
 src/chunker.o: src/chunker.cpp.o
 .PHONY : src/chunker.o
@@ -762,6 +825,30 @@ tests/student_tests.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/student_tests.dir/build.make CMakeFiles/student_tests.dir/tests/student_tests.cpp.s
 .PHONY : tests/student_tests.cpp.s
 
+tools/aiws_send.o: tools/aiws_send.cpp.o
+.PHONY : tools/aiws_send.o
+
+# target to build an object file
+tools/aiws_send.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/tools/aiws_send.cpp.o
+.PHONY : tools/aiws_send.cpp.o
+
+tools/aiws_send.i: tools/aiws_send.cpp.i
+.PHONY : tools/aiws_send.i
+
+# target to preprocess a source file
+tools/aiws_send.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/tools/aiws_send.cpp.i
+.PHONY : tools/aiws_send.cpp.i
+
+tools/aiws_send.s: tools/aiws_send.cpp.s
+.PHONY : tools/aiws_send.s
+
+# target to generate assembly for a file
+tools/aiws_send.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/aiws_send.dir/build.make CMakeFiles/aiws_send.dir/tools/aiws_send.cpp.s
+.PHONY : tools/aiws_send.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -777,11 +864,14 @@ help:
 	@echo "... aiws_app_autogen_timestamp_deps"
 	@echo "... aiws_m2_autogen"
 	@echo "... aiws_m2_autogen_timestamp_deps"
+	@echo "... aiws_send_autogen"
+	@echo "... aiws_send_autogen_timestamp_deps"
 	@echo "... student_tests_autogen"
 	@echo "... student_tests_autogen_timestamp_deps"
 	@echo "... ai_workspace_m4"
 	@echo "... aiws_app"
 	@echo "... aiws_m2"
+	@echo "... aiws_send"
 	@echo "... student_tests"
 	@echo "... ai_workspace_m4_autogen/mocs_compilation.o"
 	@echo "... ai_workspace_m4_autogen/mocs_compilation.i"
@@ -792,6 +882,9 @@ help:
 	@echo "... aiws_m2_autogen/mocs_compilation.o"
 	@echo "... aiws_m2_autogen/mocs_compilation.i"
 	@echo "... aiws_m2_autogen/mocs_compilation.s"
+	@echo "... aiws_send_autogen/mocs_compilation.o"
+	@echo "... aiws_send_autogen/mocs_compilation.i"
+	@echo "... aiws_send_autogen/mocs_compilation.s"
 	@echo "... src/chunker.o"
 	@echo "... src/chunker.i"
 	@echo "... src/chunker.s"
@@ -843,6 +936,9 @@ help:
 	@echo "... tests/student_tests.o"
 	@echo "... tests/student_tests.i"
 	@echo "... tests/student_tests.s"
+	@echo "... tools/aiws_send.o"
+	@echo "... tools/aiws_send.i"
+	@echo "... tools/aiws_send.s"
 .PHONY : help
 
 

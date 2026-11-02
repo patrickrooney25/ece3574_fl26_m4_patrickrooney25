@@ -47,7 +47,7 @@ struct qt_meta_stringdata_aiws__gui__MainWindow_t {
     char stringdata17[18];
     char stringdata18[17];
     char stringdata19[19];
-    char stringdata20[22];
+    char stringdata20[38];
     char stringdata21[9];
     char stringdata22[9];
     char stringdata23[11];
@@ -78,12 +78,12 @@ Q_CONSTINIT static const qt_meta_stringdata_aiws__gui__MainWindow_t qt_meta_stri
         QT_MOC_LITERAL(225, 17),  // "reset_application"
         QT_MOC_LITERAL(243, 16),  // "exit_application"
         QT_MOC_LITERAL(260, 18),  // "on_build_completed"
-        QT_MOC_LITERAL(279, 21),  // "aiws::ProcessingCore*"
-        QT_MOC_LITERAL(301, 8),  // "new_core"
-        QT_MOC_LITERAL(310, 8),  // "uint64_t"
-        QT_MOC_LITERAL(319, 10),  // "generation"
-        QT_MOC_LITERAL(330, 7),  // "success"
-        QT_MOC_LITERAL(338, 13)   // "error_message"
+        QT_MOC_LITERAL(279, 37),  // "std::shared_ptr<aiws::Process..."
+        QT_MOC_LITERAL(317, 8),  // "new_core"
+        QT_MOC_LITERAL(326, 8),  // "uint64_t"
+        QT_MOC_LITERAL(335, 10),  // "generation"
+        QT_MOC_LITERAL(346, 7),  // "success"
+        QT_MOC_LITERAL(354, 13)   // "error_message"
     },
     "aiws::gui::MainWindow",
     "add_document",
@@ -105,7 +105,7 @@ Q_CONSTINIT static const qt_meta_stringdata_aiws__gui__MainWindow_t qt_meta_stri
     "reset_application",
     "exit_application",
     "on_build_completed",
-    "aiws::ProcessingCore*",
+    "std::shared_ptr<aiws::ProcessingCore>",
     "new_core",
     "uint64_t",
     "generation",
@@ -196,7 +196,7 @@ Q_CONSTINIT const QMetaObject aiws::gui::MainWindow::staticMetaObject = { {
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'on_build_completed'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
-        QtPrivate::TypeAndForceComplete<aiws::ProcessingCore *, std::false_type>,
+        QtPrivate::TypeAndForceComplete<std::shared_ptr<aiws::ProcessingCore>, std::false_type>,
         QtPrivate::TypeAndForceComplete<uint64_t, std::false_type>,
         QtPrivate::TypeAndForceComplete<bool, std::false_type>,
         QtPrivate::TypeAndForceComplete<const QString &, std::false_type>
@@ -220,7 +220,7 @@ void aiws::gui::MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c
         case 7: _t->term_inspection_requested((*reinterpret_cast< std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[2]))); break;
         case 8: _t->reset_application(); break;
         case 9: _t->exit_application(); break;
-        case 10: _t->on_build_completed((*reinterpret_cast< std::add_pointer_t<aiws::ProcessingCore*>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<uint64_t>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[4]))); break;
+        case 10: _t->on_build_completed((*reinterpret_cast< std::add_pointer_t<std::shared_ptr<aiws::ProcessingCore>>>(_a[1])),(*reinterpret_cast< std::add_pointer_t<uint64_t>>(_a[2])),(*reinterpret_cast< std::add_pointer_t<bool>>(_a[3])),(*reinterpret_cast< std::add_pointer_t<QString>>(_a[4]))); break;
         default: ;
         }
     }

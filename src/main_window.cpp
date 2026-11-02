@@ -18,6 +18,11 @@
 
 #include <fstream>
 #include <sstream>
+#include <arpa/inet.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
 
 namespace aiws::gui {
 
@@ -148,6 +153,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 }
 
 MainWindow::~MainWindow() {
+    stop_ipc_server();
     if(worker_thread_.joinable()) {
         worker_thread_.join();
     }
@@ -233,7 +239,7 @@ void MainWindow::build_corpus() {
 
     //launch background worker thread
     worker_thread_ = std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
-        auto* core = new aiws::ProcessingCore();
+        auto core = std::make_shared<aiws::ProcessingCore>();
         bool success = true;
         QString error_msg;
 
@@ -252,8 +258,8 @@ void MainWindow::build_corpus() {
             error_msg="Unkown build failure.";
         }
 
-        QMetaObject::invokeMethod(this, [this, core, build_gen, success, error_msg](){
-            on_build_completed(core, build_gen, success, error_msg);
+        QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
+            on_build_completed(std::move(core), build_gen, success, error_msg);
         });
     });
 }
@@ -383,8 +389,7 @@ void MainWindow::clear_processing_outputs() {
     context_widget_->clear_context();
 }
 
-void MainWindow::on_build_completed(aiws::ProcessingCore* new_core, uint64_t generation, bool success, const QString& error_message){
-    std::unique_ptr<aiws::ProcessingCore> core_ptr(new_core);
+void MainWindow::on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message){
 
 #ifndef AIWS_FAULT_LOSE_FAILURE
     if(!success){
@@ -394,7 +399,7 @@ void MainWindow::on_build_completed(aiws::ProcessingCore* new_core, uint64_t gen
         return;
     }
 #else
-    if(!sucess){
+    if(!success){
         return;
     }
 #endif
@@ -406,7 +411,9 @@ void MainWindow::on_build_completed(aiws::ProcessingCore* new_core, uint64_t gen
 #endif
 
     //move built core into active member
-    processing_core_ = std::move(*core_ptr);
+    if (new_core){
+        processing_core_ = std::move(*new_core);
+    }
     corpus_current_ = true;
     const std::size_t total_chunks = processing_core_.chunk_count();
     workspace_widget_->set_corpus_status(QString("Corpus <b>Ready - %1 chunks</b>").arg(total_chunks));
@@ -414,6 +421,140 @@ void MainWindow::on_build_completed(aiws::ProcessingCore* new_core, uint64_t gen
     update_action_states();
     status_label_->setText("<b>Current status:</b> Corpus built successfully.");
 
+}
+
+void MainWindow::set_ipc_socket_path(const std::string& path){
+    ipc_socket_path_ = path;
+    start_ipc_server();
+}
+
+void MainWindow::start_ipc_server(){
+    if(ipc_socket_path_.empty() || ipc_running_){
+        return;
+    }
+
+    ::unlink(ipc_socket_path_.c_str());
+
+    server_socket_fd_ = ::socket(AF_UNIX, SOCK_STREAM, 0);
+    if(server_socket_fd_ < 0){
+        return;
+    }
+
+    int flags = ::fcntl(server_socket_fd_, F_GETFL, 0);
+    ::fcntl(server_socket_fd_, F_SETFL, flags | O_NONBLOCK);
+
+    sockaddr_un addr{};
+    addr.sun_family = AF_UNIX;
+    std::strncpy(addr.sun_path, ipc_socket_path_.c_str(), sizeof(addr.sun_path) - 1);
+
+    if(::bind(server_socket_fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0){
+        ::close(server_socket_fd_);
+        server_socket_fd_ = -1;
+        return;
+    }
+
+    if(::listen(server_socket_fd_, 16) < 0){
+        ::close(server_socket_fd_);
+        server_socket_fd_ = -1;
+        return;
+    }
+
+    ipc_running_ = true;
+    ipc_thread_ = std::thread(&MainWindow::ipc_server_loop, this);
+}
+
+void MainWindow::stop_ipc_server(){
+    ipc_running_ = false;
+    if(ipc_thread_.joinable()){
+        ipc_thread_.join();
+    }
+    if(server_socket_fd_ >= 0){
+        ::close(server_socket_fd_);
+        server_socket_fd_ = -1;
+    }
+    if(!ipc_socket_path_.empty()){
+        ::unlink(ipc_socket_path_.c_str());
+    }
+}
+
+void MainWindow::ipc_server_loop(){
+    auto read_exact = [](int fd, void* buf, size_t len) -> bool{
+        char* ptr = static_cast<char*>(buf);
+        size_t rem=len;
+        while(rem>0){
+            ssize_t n = ::read(fd, ptr, rem);
+            if(n<=0){
+                return false;
+            }
+            ptr += n;
+            rem -= static_cast<size_t>(n);
+        }
+        return true;
+    };
+
+    auto write_exact = [](int fd, const void* buf, size_t len) -> bool{
+        const char* ptr = static_cast<const char*>(buf);
+        size_t rem=len;
+        while(rem>0){
+            ssize_t n = ::write(fd, ptr, rem);
+            if(n<=0){
+                return false;
+            }
+            ptr += n;
+            rem -= static_cast<size_t>(n);
+        }
+        return true;
+    };
+
+    while(ipc_running_){
+        int client_fd = ::accept(server_socket_fd_, nullptr, nullptr);
+        if(client_fd < 0){
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            continue;
+        }
+
+        struct timeval tv{};
+        tv.tv_sec = 5;
+        tv.tv_usec = 0;
+        ::setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+        ::setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
+
+        uint32_t path_len_net=0;
+        if(!read_exact(client_fd, &path_len_net, sizeof(path_len_net))){
+            ::close(client_fd);
+            continue;
+        }
+        uint32_t path_len = ntohl(path_len_net);
+
+        std::string path_str(path_len, '\0');
+        if(!read_exact(client_fd, &path_str[0], path_len)){
+            ::close(client_fd);
+            continue;
+        }
+
+        //check readability
+        std::ifstream test_file(path_str);
+        bool readable = test_file.good();
+        test_file.close();
+
+        uint8_t status_code = readable ? 0 : 1;
+        std::string reason = readable ? "" : "FIle unreadable or does not exist: " + path_str;
+        uint32_t reason_len_net = htonl(static_cast<uint32_t>(reason.size()));
+
+        //send reply
+        write_exact(client_fd, &status_code, sizeof(status_code));
+        write_exact(client_fd, &reason_len_net, sizeof(reason_len_net));
+        if(!reason.empty()){
+            write_exact(client_fd, reason.data(), reason.size());
+        }
+        ::close(client_fd);
+
+        if(readable){
+            QString qpath =QString::fromUtf8(path_str.data(), static_cast<int>(path_str.size()));
+            QMetaObject::invokeMethod(this, [this,qpath](){add_document_file(qpath);}, Qt::QueuedConnection);
+        }
+    
+    }
 }
 
 }  // namespace aiws::gui

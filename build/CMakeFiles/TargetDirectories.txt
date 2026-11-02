@@ -1,6 +1,7 @@
 /mnt/build/CMakeFiles/aiws_m2.dir
 /mnt/build/CMakeFiles/aiws_app.dir
 /mnt/build/CMakeFiles/ai_workspace_m4.dir
+/mnt/build/CMakeFiles/aiws_send.dir
 /mnt/build/CMakeFiles/student_tests.dir
 /mnt/build/CMakeFiles/test.dir
 /mnt/build/CMakeFiles/edit_cache.dir
@@ -11,5 +12,7 @@
 /mnt/build/CMakeFiles/aiws_app_autogen.dir
 /mnt/build/CMakeFiles/ai_workspace_m4_autogen_timestamp_deps.dir
 /mnt/build/CMakeFiles/ai_workspace_m4_autogen.dir
+/mnt/build/CMakeFiles/aiws_send_autogen_timestamp_deps.dir
+/mnt/build/CMakeFiles/aiws_send_autogen.dir
 /mnt/build/CMakeFiles/student_tests_autogen_timestamp_deps.dir
 /mnt/build/CMakeFiles/student_tests_autogen.dir

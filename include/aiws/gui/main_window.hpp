@@ -5,6 +5,7 @@
 #include <atomic>
 #include <memory>
 #include <cstdint>
+#include <string>
 
 #include "aiws/processing_core.hpp"
 #include "aiws/workspace.hpp"
@@ -71,6 +72,8 @@ public:
      */
     void set_build_delay_ms(int ms_per_document);
 
+    void set_ipc_socket_path(const std::string& path);
+
     // Everything below this line is the M3 design. In M4 it is yours to
     // change: add, remove, or redesign private members, slots, and helpers.
 
@@ -129,7 +132,7 @@ private slots:
      */
     void exit_application();
 
-    void on_build_completed(aiws::ProcessingCore* new_core, uint64_t generation, bool success, const QString& error_message);
+    void on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message);
 
 
 private:
@@ -151,6 +154,10 @@ private:
      */
     void clear_processing_outputs();
 
+    void start_ipc_server();
+    void stop_ipc_server();
+    void ipc_server_loop();
+
     Workspace workspace_;
     ProcessingCore processing_core_;
     bool corpus_current_{false};
@@ -166,6 +173,10 @@ private:
     int build_delay_ms_{0};
     std::thread worker_thread_;
     std::atomic<uint64_t> current_generation_{0};
+    std::string ipc_socket_path_;
+    int server_socket_fd_{-1};
+    std::atomic<bool> ipc_running_{false};
+    std::thread ipc_thread_;
 };
 
 }  // namespace aiws::gui
