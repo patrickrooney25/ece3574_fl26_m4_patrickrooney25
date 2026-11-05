@@ -228,7 +228,8 @@ void MainWindow::build_corpus() {
         worker_thread_.join();
     }
 
-    const uint64_t build_gen = current_generation_++; //snapshot workspace
+    const uint64_t build_gen = current_generation_++; 
+    //snapshot workspace
     Workspace snapshot = workspace_;
     const int delay = build_delay_ms_;
 
@@ -433,6 +434,7 @@ void MainWindow::start_ipc_server(){
         return;
     }
 
+    //remove any existing socket file
     ::unlink(ipc_socket_path_.c_str());
 
     server_socket_fd_ = ::socket(AF_UNIX, SOCK_STREAM, 0);
@@ -440,6 +442,7 @@ void MainWindow::start_ipc_server(){
         return;
     }
 
+    //mark socket as non blocking so accept() wont freeze thread if no connection
     int flags = ::fcntl(server_socket_fd_, F_GETFL, 0);
     ::fcntl(server_socket_fd_, F_SETFL, flags | O_NONBLOCK);
 
@@ -459,6 +462,7 @@ void MainWindow::start_ipc_server(){
         return;
     }
 
+    //launch server thread
     ipc_running_ = true;
     ipc_thread_ = std::thread(&MainWindow::ipc_server_loop, this);
 }

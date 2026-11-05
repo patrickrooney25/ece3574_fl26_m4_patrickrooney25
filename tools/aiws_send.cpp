@@ -11,6 +11,8 @@
 #include <string>
 #include <vector>
 
+//client- a CLI utility
+
 namespace {
 
 std::string get_default_socket_path(){
@@ -18,7 +20,7 @@ std::string get_default_socket_path(){
     if(user!=nullptr && *user!='\0'){
         return "/tmp/aiws-" +std::string(user) +".sock";
     }
-    return "/tmp/aiws-" + std::to_string(getuid()) + ".sock";
+    return "/tmp/aiws-"+std::to_string(getuid()) + ".sock";
 }
 
 bool send_all (int fd, const void* data, size_t length){
@@ -60,25 +62,25 @@ int main(int argc, char* argv[]){
         if (arg=="--socket"){
             if(i+1>=argc){
                 std::cerr << "Error: --socket requires a path argument\n";
-                return 1;
+                return 1; //rejected doc for no path
             }
             socket_path = argv[i++];
         }
         else if(arg=="add"){
             if(i+1>=argc){
                 std::cerr << "Error: add requires a FILE argument\n";
-                return 1;
+                return 1; //rejected doc for no file
             }
             file_path = argv[i++];
         }
         else{
             std::cerr << "Error: unknown argument: " << arg << "\n";
-            return 1;
+            return 1; //rejected doc for unknown argument
         }
     }
     if(file_path.empty()){
         std::cerr << "Error: no file specified. \n";
-        return 1;
+        return 1; //rejected doc for being empty
     }
 
     //E1
@@ -91,7 +93,7 @@ int main(int argc, char* argv[]){
 
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if(fd<0){
-        return 2;
+        return 2; //connection error
     }
 
     sockaddr_un addr{};
@@ -99,7 +101,7 @@ int main(int argc, char* argv[]){
     if(socket_path.size() >= sizeof(addr.sun_path)){
         std::cerr << "Error: socket path too long: " << socket_path << "\n";
         close(fd);
-        return 2;
+        return 2; //connection error
     }
     std::strncpy(addr.sun_path, socket_path.c_str(), sizeof(addr.sun_path) -1);
 
