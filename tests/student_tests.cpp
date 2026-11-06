@@ -88,11 +88,10 @@ private slots:
         }
 
         //run aiws_send
+        QString bin = QCoreApplication::applicationDirPath()+ "/aiws_send";
         QProcess client;
-        client.start("/mnt/build/aiws_send", {"--socket", sock_path, "add", QString::fromStdString(rel_path)});
+        client.start(bin, {"--socket", sock_path, "add", QString::fromStdString(rel_path)});
         QVERIFY(client.waitForFinished(3000));
-        qDebug() << "aiws_send stderr:" << client.readAllStandardError();
-        qDebug() << "aiws_send stdout:" << client.readAllStandardOutput();
 
         QCOMPARE(client.exitCode(), 0);
 
@@ -110,8 +109,9 @@ private slots:
         window.set_ipc_socket_path(sock_path.toStdString());
         QTest::qWait(100);
 
+        QString bin = QCoreApplication::applicationDirPath()+ "/aiws_send";
         QProcess client;
-        client.start("/mnt/build/aiws_send", {"--socket", sock_path, "add", "/tmp/missing_file.txt"});
+        client.start(bin, {"--socket", sock_path, "add", "/tmp/missing_file.txt"});
         QVERIFY(client.waitForFinished(3000));
         QCOMPARE(client.exitCode(), 1);
 
@@ -125,15 +125,16 @@ private slots:
     }
 
     void test_unreachable_server(){
+        QString bin = QCoreApplication::applicationDirPath()+ "/aiws_send";
         QProcess client;
-        client.start("/mnt/build/aiws_send", {"--socket", "/tmp/aiws_unreachable.sock", "add", "content.txt"});
+        client.start(bin, {"--socket", "/tmp/aiws_unreachable.sock", "add", "content.txt"});
         QVERIFY(client.waitForFinished(4000));
 
         QCOMPARE(client.exitCode(), 2);
     }
 
     void test_shutdown(){
-        std::string sock_path = "/mnt/build/aiws_test_shutdown.sock";
+        std::string sock_path = "/tmp/aiws_test_shutdown.sock";
 
         auto start = std::chrono::steady_clock::now();
         {
