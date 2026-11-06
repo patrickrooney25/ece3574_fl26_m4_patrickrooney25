@@ -230,7 +230,7 @@ void MainWindow::build_corpus() {
     }
 
     const uint64_t build_gen = ++current_generation_;
-    corpus=false; 
+    corpus_current_=false; 
     //snapshot workspace
     Workspace snapshot = workspace_;
     const int delay = build_delay_ms_;
