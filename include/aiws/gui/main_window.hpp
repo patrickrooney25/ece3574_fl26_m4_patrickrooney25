@@ -74,6 +74,9 @@ public:
 
     void set_ipc_socket_path(const std::string& path);
 
+    void on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message);
+
+
     // Everything below this line is the M3 design. In M4 it is yours to
     // change: add, remove, or redesign private members, slots, and helpers.
 
@@ -131,9 +134,6 @@ private slots:
      * @brief Invokes the registered Exit callback for the current exit request.
      */
     void exit_application();
-
-    void on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message);
-
 
 private:
     /**

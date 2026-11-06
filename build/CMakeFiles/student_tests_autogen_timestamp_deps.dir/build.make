@@ -67,8 +67,8 @@ include CMakeFiles/student_tests_autogen_timestamp_deps.dir/compiler_depend.make
 include CMakeFiles/student_tests_autogen_timestamp_deps.dir/progress.make
 
 CMakeFiles/student_tests_autogen_timestamp_deps: libaiws_app.a
-CMakeFiles/student_tests_autogen_timestamp_deps: /usr/lib/qt6/libexec/moc
 CMakeFiles/student_tests_autogen_timestamp_deps: /usr/lib/x86_64-linux-gnu/libQt6Test.so.6.4.2
+CMakeFiles/student_tests_autogen_timestamp_deps: /usr/lib/qt6/libexec/moc
 
 student_tests_autogen_timestamp_deps: CMakeFiles/student_tests_autogen_timestamp_deps
 student_tests_autogen_timestamp_deps: CMakeFiles/student_tests_autogen_timestamp_deps.dir/build.make

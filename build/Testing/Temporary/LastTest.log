@@ -1,26 +1,32 @@
-Start testing: Nov 02 18:29 UTC
+Start testing: Nov 06 03:47 UTC
 ----------------------------------------------------------
 1/1 Testing: student_tests
 1/1 Test: student_tests
 Command: "/mnt/build/student_tests"
 Directory: /mnt/build
-"student_tests" start time: Nov 02 18:29 UTC
+"student_tests" start time: Nov 06 03:47 UTC
 Output:
 ----------------------------------------------------------
 ********* Start testing of StudentTests *********
 Config: Using QtTest library 6.4.2, Qt 6.4.2 (x86_64-little_endian-lp64 shared (dynamic) release build; by GCC 13.2.0), ubuntu 24.04
 PASS   : StudentTests::initTestCase()
-PASS   : StudentTests::test_detects_stale_build()
-PASS   : StudentTests::test_detects_lost_failure()
+PASS   : StudentTests::test_stale_build_dropped()
+PASS   : StudentTests::test_build_failure_delivered()
+QDEBUG : StudentTests::test_valid_file_and_relative_path() aiws_send stderr: ""
+QDEBUG : StudentTests::test_valid_file_and_relative_path() aiws_send stdout: ""
+PASS   : StudentTests::test_valid_file_and_relative_path()
+PASS   : StudentTests::test_reject_missing_file()
+PASS   : StudentTests::test_unreachable_server()
+PASS   : StudentTests::test_shutdown()
 PASS   : StudentTests::cleanupTestCase()
-Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 433ms
+Totals: 8 passed, 0 failed, 0 skipped, 0 blacklisted, 2501ms
 ********* Finished testing of StudentTests *********
 <end of output>
-Test time =   0.47 sec
+Test time =   2.55 sec
 ----------------------------------------------------------
 Test Passed.
-"student_tests" end time: Nov 02 18:29 UTC
-"student_tests" time elapsed: 00:00:00
+"student_tests" end time: Nov 06 03:47 UTC
+"student_tests" time elapsed: 00:00:02
 ----------------------------------------------------------
 
-End testing: Nov 02 18:29 UTC
+End testing: Nov 06 03:47 UTC

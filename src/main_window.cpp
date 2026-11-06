@@ -239,19 +239,20 @@ void MainWindow::build_corpus() {
     update_action_states();
 
     //launch background worker thread
-    worker_thread_ = std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
+    worker_thread_=std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
+        //heap ownership
         auto core = std::make_shared<aiws::ProcessingCore>();
         bool success = true;
         QString error_msg;
 
         try{
-            if (delay>0){
+            if (delay>0){ //artificial delay
                 for (std::size_t i=0; i<snapshot.documents().size(); i++){
                     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
                 }
             }
             core->rebuild(snapshot);
-        }catch(const std::exception& e){
+        }catch(const std::exception& e){ //get exceptions to report failure
             success =false;
             error_msg=QString::fromStdString(e.what());
         }catch(...){
@@ -259,6 +260,7 @@ void MainWindow::build_corpus() {
             error_msg="Unkown build failure.";
         }
 
+        //completion back to gui event loop
         QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
             on_build_completed(std::move(core), build_gen, success, error_msg);
         });
@@ -392,6 +394,7 @@ void MainWindow::clear_processing_outputs() {
 
 void MainWindow::on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message){
 
+//handle build failure
 #ifndef AIWS_FAULT_LOSE_FAILURE
     if(!success){
         status_label_->setText(QString("<b>Current status:</b> Build failed: %1").arg(error_message));
@@ -400,21 +403,24 @@ void MainWindow::on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_co
         return;
     }
 #else
+    //silently drop failure
     if(!success){
         return;
     }
 #endif
 
-#ifndef AIWS_FAULT_ACCEPT_STALE //drop completion if newer mutation happened mid build
-    if(generation != current_generation_){
+//drop completion if newer mutation happened mid build
+#ifndef AIWS_FAULT_ACCEPT_STALE
+    if(generation!=current_generation_){
         return;
     }
 #endif
 
     //move built core into active member
     if (new_core){
-        processing_core_ = std::move(*new_core);
+        processing_core_= std::move(*new_core);
     }
+    //update gui on gui thread
     corpus_current_ = true;
     const std::size_t total_chunks = processing_core_.chunk_count();
     workspace_widget_->set_corpus_status(QString("Corpus <b>Ready - %1 chunks</b>").arg(total_chunks));
@@ -430,15 +436,16 @@ void MainWindow::set_ipc_socket_path(const std::string& path){
 }
 
 void MainWindow::start_ipc_server(){
-    if(ipc_socket_path_.empty() || ipc_running_){
+    if(ipc_socket_path_.empty()|| ipc_running_){
         return;
     }
 
     //remove any existing socket file
     ::unlink(ipc_socket_path_.c_str());
 
+    //POSIX unix domain streaming sockets
     server_socket_fd_ = ::socket(AF_UNIX, SOCK_STREAM, 0);
-    if(server_socket_fd_ < 0){
+    if(server_socket_fd_<0){
         return;
     }
 
@@ -447,7 +454,7 @@ void MainWindow::start_ipc_server(){
     ::fcntl(server_socket_fd_, F_SETFL, flags | O_NONBLOCK);
 
     sockaddr_un addr{};
-    addr.sun_family = AF_UNIX;
+    addr.sun_family= AF_UNIX;
     std::strncpy(addr.sun_path, ipc_socket_path_.c_str(), sizeof(addr.sun_path) - 1);
 
     if(::bind(server_socket_fd_, reinterpret_cast<sockaddr*>(&addr), sizeof(addr)) < 0){
@@ -456,19 +463,19 @@ void MainWindow::start_ipc_server(){
         return;
     }
 
-    if(::listen(server_socket_fd_, 16) < 0){
+    if(::listen(server_socket_fd_, 16) <0){
         ::close(server_socket_fd_);
         server_socket_fd_ = -1;
         return;
     }
 
     //launch server thread
-    ipc_running_ = true;
+    ipc_running_=true;
     ipc_thread_ = std::thread(&MainWindow::ipc_server_loop, this);
 }
 
 void MainWindow::stop_ipc_server(){
-    ipc_running_ = false;
+    ipc_running_=false;
     if(ipc_thread_.joinable()){
         ipc_thread_.join();
     }
@@ -482,7 +489,8 @@ void MainWindow::stop_ipc_server(){
 }
 
 void MainWindow::ipc_server_loop(){
-    auto read_exact = [](int fd, void* buf, size_t len) -> bool{
+    //reads exact len bytes or aborts on error
+    auto read_exact= [](int fd, void* buf, size_t len) ->bool{
         char* ptr = static_cast<char*>(buf);
         size_t rem=len;
         while(rem>0){
@@ -490,12 +498,13 @@ void MainWindow::ipc_server_loop(){
             if(n<=0){
                 return false;
             }
-            ptr += n;
-            rem -= static_cast<size_t>(n);
+            ptr+=n;
+            rem-= static_cast<size_t>(n);
         }
         return true;
     };
 
+    //writes or aborts on error
     auto write_exact = [](int fd, const void* buf, size_t len) -> bool{
         const char* ptr = static_cast<const char*>(buf);
         size_t rem=len;
@@ -504,25 +513,28 @@ void MainWindow::ipc_server_loop(){
             if(n<=0){
                 return false;
             }
-            ptr += n;
-            rem -= static_cast<size_t>(n);
+            ptr+=n;
+            rem-=static_cast<size_t>(n);
         }
         return true;
     };
 
     while(ipc_running_){
+        //nonblocking poll for incoming connections
         int client_fd = ::accept(server_socket_fd_, nullptr, nullptr);
-        if(client_fd < 0){
+        if(client_fd<0){
             std::this_thread::sleep_for(std::chrono::milliseconds(20));
             continue;
         }
 
+        //5 second timeout
         struct timeval tv{};
-        tv.tv_sec = 5;
+        tv.tv_sec =5;
         tv.tv_usec = 0;
         ::setsockopt(client_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
         ::setsockopt(client_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv));
 
+        //write protocol
         uint32_t path_len_net=0;
         if(!read_exact(client_fd, &path_len_net, sizeof(path_len_net))){
             ::close(client_fd);
@@ -530,19 +542,25 @@ void MainWindow::ipc_server_loop(){
         }
         uint32_t path_len = ntohl(path_len_net);
 
+        //read path
         std::string path_str(path_len, '\0');
         if(!read_exact(client_fd, &path_str[0], path_len)){
             ::close(client_fd);
             continue;
         }
 
-        //check readability
+        //check readability/presence
         std::ifstream test_file(path_str);
-        bool readable = test_file.good();
+        bool readable =test_file.good();
         test_file.close();
 
-        uint8_t status_code = readable ? 0 : 1;
-        std::string reason = readable ? "" : "FIle unreadable or does not exist: " + path_str;
+        //wire protocol
+        uint8_t status_code= 0;
+        std::string reason;
+        if(!readable){
+            status_code=1;
+            reason = "File unreadable or does not exist: "+ path_str;
+        }
         uint32_t reason_len_net = htonl(static_cast<uint32_t>(reason.size()));
 
         //send reply
@@ -553,6 +571,7 @@ void MainWindow::ipc_server_loop(){
         }
         ::close(client_fd);
 
+        //queue adding doc to main gui thread
         if(readable){
             QString qpath =QString::fromUtf8(path_str.data(), static_cast<int>(path_str.size()));
             QMetaObject::invokeMethod(this, [this,qpath](){add_document_file(qpath);}, Qt::QueuedConnection);

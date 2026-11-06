@@ -332,6 +332,7 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QMargins
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QMetaEnum
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QObject
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QProcess
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QRect
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QSize
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/QSizeF
@@ -388,6 +389,7 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qhashfunctions.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevice.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qiodevicebase.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qitemselectionmodel.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qiterable.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qiterator.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qline.h
@@ -410,6 +412,7 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qpair.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qpoint.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qpointer.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qprocess.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qprocessordetection.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qrect.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtCore/qrefcount.h
@@ -487,17 +490,16 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiexports.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qtguiglobal.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qtransform.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qvalidator.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qvector2d.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qvector3d.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qvector4d.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qvectornd.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qwindow.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtGui/qwindowdefs.h
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/QSignalSpy
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/QTest
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qbenchmark.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qbenchmarkmetric.h
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qsignalspy.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtest.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtest_gui.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtest_widgets.h
@@ -505,7 +507,6 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestcase.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestdata.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestevent.h
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtesteventloop.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestkeyboard.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestmouse.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qtestspontaneevent.h
@@ -515,16 +516,26 @@
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qttestglobal.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtTest/qttestlib-config.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QLabel
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QListWidget
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QMainWindow
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QPushButton
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/QSizePolicy
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractbutton.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractitemdelegate.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractitemview.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractscrollarea.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractslider.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qabstractspinbox.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qapplication.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qframe.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlabel.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlistview.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qlistwidget.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qmainwindow.h
- mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qpushbutton.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qrubberband.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qsizepolicy.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qslider.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qstyle.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qstyleoption.h
+ mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtabbar.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtabwidget.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtestsupport_widgets.h
  mdp:/usr/include/x86_64-linux-gnu/qt6/QtWidgets/qtwidgets-config.h
