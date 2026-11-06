@@ -11,7 +11,6 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QSplitter>
 #include <QWidget>
 #include <QFrame>
 #include <chrono>
@@ -257,7 +256,8 @@ void MainWindow::build_corpus() {
                         if(!worker_running_){
                             return;
                         }
-                        std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+                        const int current_sleep=std::min(step_ms, delay-elapsed);
+                        std::this_thread::sleep_for(std::chrono::milliseconds(current_sleep));
                     }
                 }
             }
