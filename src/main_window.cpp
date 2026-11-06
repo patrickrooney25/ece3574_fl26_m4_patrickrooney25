@@ -274,9 +274,11 @@ void MainWindow::build_corpus() {
         }
 
         //completion back to gui event loop
-        QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
-            on_build_completed(std::move(core), build_gen, success, error_msg);
+        if(worker_running_){
+            QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
+                on_build_completed(std::move(core), build_gen, success, error_msg);
         });
+        }
     });
 }
 
