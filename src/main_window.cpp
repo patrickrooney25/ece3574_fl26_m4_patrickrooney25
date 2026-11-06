@@ -250,7 +250,7 @@ void MainWindow::build_corpus() {
 
         try{
             if (delay>0){ //artificial delay
-                for (std::size_t i=0; i<snapshot.documents().size(); i++){
+                for (std::size_t i=0; i<snapshot.documents().size(); ++i){
                     const int step_ms = 20;
                     for (int elapsed=0; elapsed<delay; elapsed+=step_ms){
                         if(!worker_running_){
@@ -260,6 +260,9 @@ void MainWindow::build_corpus() {
                         std::this_thread::sleep_for(std::chrono::milliseconds(current_sleep));
                     }
                 }
+            }
+            if (!worker_running_){
+                return;
             }
             core->rebuild(snapshot);
         }catch(const std::exception& e){ //get exceptions to report failure
