@@ -228,7 +228,7 @@ void MainWindow::build_corpus() {
         worker_thread_.join();
     }
 
-    const uint64_t build_gen = current_generation_++; 
+    const uint64_t build_gen = current_generation_.load(); 
     //snapshot workspace
     Workspace snapshot = workspace_;
     const int delay = build_delay_ms_;
