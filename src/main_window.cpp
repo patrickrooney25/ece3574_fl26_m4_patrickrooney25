@@ -225,7 +225,7 @@ void MainWindow::build_corpus() {
     }
 
     if (worker_thread_.joinable()) { //join build thread before launching another
-        worker_thread_.join();
+        worker_thread_.detach();
     }
 
     const uint64_t build_gen = ++current_generation_;
