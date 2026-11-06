@@ -176,7 +176,6 @@ private:
     std::string ipc_socket_path_;
     int server_socket_fd_{-1};
     std::atomic<bool> ipc_running_{false};
-    std::atomic<bool> worker_running_{false};
     std::thread ipc_thread_;
 };
 

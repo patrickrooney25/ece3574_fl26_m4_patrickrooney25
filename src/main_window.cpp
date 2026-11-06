@@ -11,6 +11,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QSplitter>
 #include <QWidget>
 #include <QFrame>
 #include <chrono>
@@ -153,7 +154,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
 
 MainWindow::~MainWindow() {
     stop_ipc_server();
-    worker_running_=false;
     if(worker_thread_.joinable()) {
         worker_thread_.join();
     }
@@ -225,11 +225,10 @@ void MainWindow::build_corpus() {
     }
 
     if (worker_thread_.joinable()) { //join build thread before launching another
-        worker_thread_.detach();
+        worker_thread_.join();
     }
 
-    const uint64_t build_gen = ++current_generation_;
-    corpus_current_=false; 
+    const uint64_t build_gen = current_generation_++; 
     //snapshot workspace
     Workspace snapshot = workspace_;
     const int delay = build_delay_ms_;
@@ -238,8 +237,6 @@ void MainWindow::build_corpus() {
     workspace_widget_->set_corpus_status("Corpus: <b>Building...</b>");
     status_label_->setText("<b>Current status:</b> Building corpus...");
     update_action_states();
-
-    worker_running_=true;
 
     //launch background worker thread
     worker_thread_=std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
@@ -250,19 +247,9 @@ void MainWindow::build_corpus() {
 
         try{
             if (delay>0){ //artificial delay
-                for (std::size_t i=0; i<snapshot.documents().size(); ++i){
-                    const int step_ms = 20;
-                    for (int elapsed=0; elapsed<delay; elapsed+=step_ms){
-                        if(!worker_running_){
-                            return;
-                        }
-                        const int current_sleep=std::min(step_ms, delay-elapsed);
-                        std::this_thread::sleep_for(std::chrono::milliseconds(current_sleep));
-                    }
+                for (std::size_t i=0; i<snapshot.documents().size(); i++){
+                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
                 }
-            }
-            if (!worker_running_){
-                return;
             }
             core->rebuild(snapshot);
         }catch(const std::exception& e){ //get exceptions to report failure
@@ -274,11 +261,9 @@ void MainWindow::build_corpus() {
         }
 
         //completion back to gui event loop
-        if(worker_running_){
-            QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
-                on_build_completed(std::move(core), build_gen, success, error_msg);
+        QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
+            on_build_completed(std::move(core), build_gen, success, error_msg);
         });
-        }
     });
 }
 
