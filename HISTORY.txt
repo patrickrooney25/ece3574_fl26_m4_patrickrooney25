@@ -1,0 +1,613 @@
+commit f87a36b4c61a2d64f11d3f2ff3f92ef8e6a6f296 (HEAD -> main, origin/main)
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-11-06 12:45:23 -0500
+
+    finished test cases and design note
+:...skipping...
+commit f87a36b4c61a2d64f11d3f2ff3f92ef8e6a6f296 (HEAD -> main, origin/main)
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-11-06 12:45:23 -0500
+
+    finished test cases and design note
+
+ DESIGN.md                                          |    28 +
+ build/CMakeCache.txt                               |     6 +
+ .../ai_workspace_m4.dir/compiler_depend.internal   |   574 -
+ .../ai_workspace_m4.dir/compiler_depend.make       |  1700 +--
+ .../aiws_app_autogen/mocs_compilation.cpp.o        |   Bin 122208 -> 100528 bytes
+ .../aiws_app.dir/compiler_depend.internal          |  4791 --------
+ build/CMakeFiles/aiws_app.dir/compiler_depend.make |  5136 +-------
+ .../aiws_app_autogen.dir/compiler_depend.internal  |  1707 +++
+ .../aiws_app_autogen.dir/compiler_depend.make      |  1707 +++
+ .../aiws_app_autogen_timestamp_deps.dir/build.make |     2 +-
+ .../aiws_m2.dir/compiler_depend.internal           |  1360 ---
+ build/CMakeFiles/aiws_m2.dir/compiler_depend.make  |  2115 +---
+ .../aiws_send.dir/compiler_depend.internal         |   678 --
+ .../CMakeFiles/aiws_send.dir/compiler_depend.make  |  1464 +--
+ .../CMakeFiles/aiws_send.dir/tools/aiws_send.cpp.o |   Bin 46704 -> 46800 bytes
+ .../aiws_send_autogen.dir/compiler_depend.internal |   276 +
+ .../aiws_send_autogen.dir/compiler_depend.make     |   276 +
+ .../student_tests.dir/compiler_depend.internal     |  3397 +-----
+ .../student_tests.dir/compiler_depend.make         |  4811 ++------
+ .../student_tests.dir/tests/student_tests.cpp.o    |   Bin 184776 -> 233624 bytes
+ .../student_tests.dir/tests/student_tests.cpp.o.d  |   186 +-
+ .../student_tests_autogen.dir/ParseCache.txt       |    23 +-
+ .../compiler_depend.internal                       | 11527 ++++++++++++++++++
+ .../student_tests_autogen.dir/compiler_depend.make | 11563 +++++++++++++++++++
+ .../build.make                                     |     2 +-
+ build/Testing/Temporary/CTestCostData.txt          |     2 +-
+ build/Testing/Temporary/LastTest.log               |    24 +-
+ build/ai_workspace_m4                              |   Bin 707656 -> 696472 bytes
+ .../YHJIA4DBD4/moc_main_window.cpp                 |    68 +-
+ build/aiws_send                                    |   Bin 40792 -> 40792 bytes
+ build/libaiws_app.a                                |   Bin 797860 -> 772364 bytes
+ build/student_tests                                |   Bin 745872 -> 750352 bytes
+ build/student_tests_autogen/deps                   |    23 +-
+ .../include/student_tests.moc                      |    74 +-
+ .../include/student_tests.moc.d                    |    23 +-
+ include/aiws/gui/main_window.hpp                   |     6 +-
+ src/main_window.cpp                                |    65 +-
+ tests/student_tests.cpp                            |   230 +-
+ tools/aiws_send.cpp                                |    72 +-
+ 39 files changed, 28672 insertions(+), 25244 deletions(-)
+
+commit b259980cd8d66242d247d2eea3eeea8590a8cd35
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-11-05 18:46:48 -0500
+
+    paired programming, initial test cases written
+
+ DESIGN.md               |  15 ++++++
+ src/main_window.cpp     |   6 ++-
+ tests/student_tests.cpp | 133 +++++++++++++++++++++++++++++++++++++++++++++++-
+ tools/aiws_send.cpp     |  16 +++---
+ 4 files changed, 161 insertions(+), 9 deletions(-)
+
+commit 2b313db1b7a0817265f45278336b48f1da924570
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-11-02 13:31:56 -0500
+
+    finished background threading and ipc server
+
+ CMakeLists.txt                                     |    4 +
+ build/CMakeFiles/CMakeRuleHashes.txt               |    3 +
+ build/CMakeFiles/Makefile.cmake                    |   66 +-
+ build/CMakeFiles/Makefile2                         |   87 +-
+ build/CMakeFiles/TargetDirectories.txt             |    3 +
+ .../ai_workspace_m4.dir/compiler_depend.internal   |  209 +-
+ .../ai_workspace_m4.dir/compiler_depend.make       | 1099 ++--
+ .../CMakeFiles/ai_workspace_m4.dir/src/main.cpp.o  |  Bin 16304 -> 98352 bytes
+ .../ai_workspace_m4.dir/src/main.cpp.o.d           |   14 +-
+ .../ai_workspace_m4_autogen.dir/AutogenInfo.json   |   65 -
+ .../compiler_depend.internal                       |  473 ++
+ .../compiler_depend.make                           |  473 ++
+ .../aiws_app_autogen/mocs_compilation.cpp.o        |  Bin 106800 -> 122208 bytes
+ .../aiws_app.dir/compiler_depend.internal          | 2153 +-------
+ build/CMakeFiles/aiws_app.dir/compiler_depend.make | 2361 +--------
+ .../CMakeFiles/aiws_app.dir/src/main_window.cpp.o  |  Bin 262424 -> 323160 bytes
+ .../aiws_app.dir/src/main_window.cpp.o.d           |   31 +-
+ .../aiws_app_autogen.dir/AutogenInfo.json          |   65 -
+ .../aiws_app_autogen.dir/compiler_depend.internal  | 4219 +++++++++++++++
+ .../aiws_app_autogen.dir/compiler_depend.make      | 4219 +++++++++++++++
+ .../aiws_m2.dir/compiler_depend.internal           |   59 -
+ build/CMakeFiles/aiws_m2.dir/compiler_depend.make  |  629 +--
+ .../aiws_m2_autogen.dir/AutogenInfo.json           |   65 -
+ .../aiws_m2_autogen.dir/compiler_depend.internal   |  145 +
+ .../aiws_m2_autogen.dir/compiler_depend.make       |  145 +
+ build/CMakeFiles/aiws_send.dir/DependInfo.cmake    |   25 +
+ .../aiws_send_autogen/mocs_compilation.cpp.o       |  Bin 0 -> 944 bytes
+ .../aiws_send_autogen/mocs_compilation.cpp.o.d     |    3 +
+ build/CMakeFiles/aiws_send.dir/build.make          |  132 +
+ build/CMakeFiles/aiws_send.dir/cmake_clean.cmake   |   18 +
+ .../aiws_send.dir/compiler_depend.internal         |  821 +++
+ .../CMakeFiles/aiws_send.dir/compiler_depend.make  | 1610 ++++++
+ build/CMakeFiles/aiws_send.dir/compiler_depend.ts  |    2 +
+ build/CMakeFiles/aiws_send.dir/depend.make         |    2 +
+ build/CMakeFiles/aiws_send.dir/flags.make          |   10 +
+ build/CMakeFiles/aiws_send.dir/link.txt            |    1 +
+ build/CMakeFiles/aiws_send.dir/progress.make       |    5 +
+ .../CMakeFiles/aiws_send.dir/tools/aiws_send.cpp.o |  Bin 0 -> 46704 bytes
+ .../aiws_send.dir/tools/aiws_send.cpp.o.d          |  206 +
+ .../aiws_send_autogen.dir/AutogenInfo.json         |  260 +
+ .../aiws_send_autogen.dir/AutogenUsed.txt          |    1 +
+ .../aiws_send_autogen.dir/DependInfo.cmake         |   23 +
+ .../aiws_send_autogen.dir/ParseCache.txt           |    2 +
+ build/CMakeFiles/aiws_send_autogen.dir/build.make  |   93 +
+ .../aiws_send_autogen.dir/cmake_clean.cmake        |   10 +
+ .../aiws_send_autogen.dir/compiler_depend.internal |  557 ++
+ .../aiws_send_autogen.dir/compiler_depend.make     |  832 +++
+ .../aiws_send_autogen.dir/compiler_depend.ts       |    2 +
+ .../CMakeFiles/aiws_send_autogen.dir/progress.make |    2 +
+ .../DependInfo.cmake                               |   22 +
+ .../build.make                                     |   86 +
+ .../cmake_clean.cmake                              |    8 +
+ .../compiler_depend.make                           |    2 +
+ .../compiler_depend.ts                             |    2 +
+ .../progress.make                                  |    1 +
+ build/CMakeFiles/progress.marks                    |    2 +-
+ .../student_tests.dir/compiler_depend.internal     | 3958 ++++++++++++++-
+ .../student_tests.dir/compiler_depend.make         | 5370 +++++++++++++++++++-
+ build/CMakeFiles/student_tests.dir/progress.make   |    8 +-
+ .../student_tests.dir/tests/student_tests.cpp.o    |  Bin 1232 -> 184776 bytes
+ .../student_tests.dir/tests/student_tests.cpp.o.d  |  481 +-
+ .../student_tests_autogen.dir/AutogenInfo.json     |   68 +-
+ .../student_tests_autogen.dir/ParseCache.txt       |  538 ++
+ .../compiler_depend.internal                       | 2829 +++++++++++
+ .../student_tests_autogen.dir/compiler_depend.make | 4289 +++++++++++++++-
+ .../student_tests_autogen.dir/progress.make        |    2 +-
+ build/CTestTestfile.cmake                          |    2 +-
+ build/Makefile                                     |   96 +
+ build/Testing/Temporary/CTestCostData.txt          |    2 +-
+ build/Testing/Temporary/LastTest.log               |   18 +-
+ build/Testing/Temporary/LastTestsFailed.log        |    1 +
+ build/ai_workspace_m4                              |  Bin 642488 -> 707656 bytes
+ build/ai_workspace_m4_autogen/deps                 |   59 -
+ .../YHJIA4DBD4/moc_main_window.cpp                 |   20 +-
+ build/aiws_app_autogen/deps                        |   59 -
+ build/aiws_m2_autogen/deps                         |   59 -
+ build/aiws_send                                    |  Bin 0 -> 40792 bytes
+ build/aiws_send_autogen/deps                       |  139 +
+ build/aiws_send_autogen/moc_predefs.h              |  462 ++
+ build/aiws_send_autogen/mocs_compilation.cpp       |    3 +
+ build/aiws_send_autogen/timestamp                  |    0
+ build/libaiws_app.a                                |  Bin 710358 -> 797860 bytes
+ build/student_tests                                |  Bin 15832 -> 745872 bytes
+ build/student_tests_autogen/deps                   |  594 ++-
+ .../include/student_tests.moc                      |  144 +
+ .../include/student_tests.moc.d                    |  536 ++
+ include/aiws/gui/main_window.hpp                   |   13 +-
+ src/main.cpp                                       |   48 +
+ src/main_window.cpp                                |  155 +-
+ tests/student_tests.cpp                            |    2 +-
+ tools/aiws_send.cpp                                |  165 +
+ 91 files changed, 34899 insertions(+), 6548 deletions(-)
+
+commit b29ad4f2f0753e65a69daa3feb01c6fae24dedee
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-11-02 09:13:54 -0500
+
+    completed background corpus build with generation tracking and fault macros
+
+ .../ai_workspace_m4.dir/compiler_depend.internal   |    3 +
+ .../ai_workspace_m4.dir/compiler_depend.make       |   57 +-
+ .../CMakeFiles/ai_workspace_m4.dir/src/main.cpp.o  |  Bin 24952 -> 16304 bytes
+ .../aiws_app_autogen/mocs_compilation.cpp.o        |  Bin 109048 -> 106800 bytes
+ .../aiws_app.dir/compiler_depend.internal          | 1884 ++++++++++++++++++++
+ build/CMakeFiles/aiws_app.dir/compiler_depend.make | 1884 ++++++++++++++++++++
+ .../CMakeFiles/aiws_app.dir/src/main_window.cpp.o  |  Bin 162952 -> 262424 bytes
+ .../CMakeFiles/aiws_app_autogen.dir/ParseCache.txt |  146 +-
+ .../aiws_app_autogen.dir/compiler_depend.internal  | 1884 ++++++++++++++++++++
+ .../aiws_app_autogen.dir/compiler_depend.make      | 1884 ++++++++++++++++++++
+ build/Testing/Temporary/CTestCostData.txt          |    2 +-
+ build/Testing/Temporary/LastTest.log               |    8 +-
+ build/ai_workspace_m4                              |  Bin 596896 -> 642488 bytes
+ .../YHJIA4DBD4/moc_main_window.cpp                 |   68 +-
+ build/libaiws_app.a                                |  Bin 600030 -> 710358 bytes
+ include/aiws/gui/main_window.hpp                   |    8 +
+ src/main_window.cpp                                |   92 +-
+ 17 files changed, 7792 insertions(+), 128 deletions(-)
+
+commit 94ec9480d7735d22b7f60d3deb3ee718f64cac3d
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-10-29 10:37:54 -0400
+
+    implemented add document file and set build delay ms
+
+ .../ai_workspace_m4.dir/compiler_depend.internal   |  421 ++
+ .../ai_workspace_m4.dir/compiler_depend.make       | 1635 +++++++-
+ .../ai_workspace_m4.dir/src/main.cpp.o.d           |    2 +
+ .../compiler_depend.internal                       |  202 +
+ .../compiler_depend.make                           |  597 ++-
+ .../aiws_app_autogen/mocs_compilation.cpp.o.d      |    2 +
+ .../aiws_app.dir/compiler_depend.internal          | 3938 +++++++++++++++++-
+ build/CMakeFiles/aiws_app.dir/compiler_depend.make | 4160 +++++++++++++++++++-
+ .../CMakeFiles/aiws_app.dir/src/main_window.cpp.o  |  Bin 163392 -> 162952 bytes
+ .../aiws_app.dir/src/main_window.cpp.o.d           |    2 +
+ .../CMakeFiles/aiws_app_autogen.dir/ParseCache.txt |    1 +
+ .../aiws_app_autogen.dir/compiler_depend.internal  | 1255 ++++++
+ .../aiws_app_autogen.dir/compiler_depend.make      | 1257 ++++++
+ .../student_tests.dir/compiler_depend.internal     |    8 +
+ .../student_tests.dir/compiler_depend.make         |   10 +
+ .../compiler_depend.internal                       |  202 +
+ .../student_tests_autogen.dir/compiler_depend.make |  597 ++-
+ build/Testing/Temporary/CTestCostData.txt          |    2 +-
+ build/Testing/Temporary/LastTest.log               |    8 +-
+ build/ai_workspace_m4                              |  Bin 597632 -> 596896 bytes
+ .../YHJIA4DBD4/moc_main_window.cpp.d               |    1 +
+ build/aiws_app_autogen/deps                        |    1 +
+ build/libaiws_app.a                                |  Bin 600846 -> 600030 bytes
+ include/aiws/gui/main_window.hpp                   |    3 +
+ src/main_window.cpp                                |   42 +-
+ 25 files changed, 14078 insertions(+), 268 deletions(-)
+
+commit 52895a503b9fbe84b64bf60eff839aa0130c654b
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-10-29 10:18:01 -0400
+
+    iniital baseline testing
+
+ CMakeLists.txt                                     |  114 +-
+ DESIGN.md                                          |    6 +-
+ DESIGN_NOTE.md                                     |   56 +-
+ build/.qt/QtDeploySupport.cmake                    |   45 +
+ build/CMakeCache.txt                               | 1304 +++++++++
+ build/CMakeFiles/3.28.3/CMakeCXXCompiler.cmake     |   85 +
+ .../3.28.3/CMakeDetermineCompilerABI_CXX.bin       |  Bin 0 -> 15992 bytes
+ build/CMakeFiles/3.28.3/CMakeSystem.cmake          |   15 +
+ .../3.28.3/CompilerIdCXX/CMakeCXXCompilerId.cpp    |  869 ++++++
+ build/CMakeFiles/3.28.3/CompilerIdCXX/a.out        |  Bin 0 -> 16096 bytes
+ build/CMakeFiles/CMakeConfigureLog.yaml            |  353 +++
+ build/CMakeFiles/CMakeDirectoryInformation.cmake   |   16 +
+ build/CMakeFiles/CMakeRuleHashes.txt               |   13 +
+ build/CMakeFiles/Makefile.cmake                    |  240 ++
+ build/CMakeFiles/Makefile2                         |  421 +++
+ build/CMakeFiles/TargetDirectories.txt             |   15 +
+ .../ai_workspace_m4.dir/DependInfo.cmake           |   25 +
+ .../ai_workspace_m4_autogen/mocs_compilation.cpp.o |  Bin 0 -> 944 bytes
+ .../mocs_compilation.cpp.o.d                       |    3 +
+ build/CMakeFiles/ai_workspace_m4.dir/build.make    |  139 +
+ .../ai_workspace_m4.dir/cmake_clean.cmake          |   18 +
+ .../ai_workspace_m4.dir/compiler_depend.internal   |  202 ++
+ .../ai_workspace_m4.dir/compiler_depend.make       |  595 ++++
+ .../ai_workspace_m4.dir/compiler_depend.ts         |    2 +
+ build/CMakeFiles/ai_workspace_m4.dir/depend.make   |    2 +
+ build/CMakeFiles/ai_workspace_m4.dir/flags.make    |   10 +
+ build/CMakeFiles/ai_workspace_m4.dir/link.txt      |    1 +
+ build/CMakeFiles/ai_workspace_m4.dir/progress.make |    5 +
+ .../CMakeFiles/ai_workspace_m4.dir/src/main.cpp.o  |  Bin 0 -> 24952 bytes
+ .../ai_workspace_m4.dir/src/main.cpp.o.d           |  357 +++
+ .../ai_workspace_m4_autogen.dir/AutogenInfo.json   |  329 +++
+ .../ai_workspace_m4_autogen.dir/AutogenUsed.txt    |    1 +
+ .../ai_workspace_m4_autogen.dir/DependInfo.cmake   |   23 +
+ .../ai_workspace_m4_autogen.dir/ParseCache.txt     |    2 +
+ .../ai_workspace_m4_autogen.dir/build.make         |   93 +
+ .../ai_workspace_m4_autogen.dir/cmake_clean.cmake  |   10 +
+ .../compiler_depend.make                           |    2 +
+ .../ai_workspace_m4_autogen.dir/compiler_depend.ts |    2 +
+ .../ai_workspace_m4_autogen.dir/progress.make      |    2 +
+ .../DependInfo.cmake                               |   22 +
+ .../build.make                                     |   87 +
+ .../cmake_clean.cmake                              |    8 +
+ .../compiler_depend.make                           |    2 +
+ .../compiler_depend.ts                             |    2 +
+ .../progress.make                                  |    1 +
+ build/CMakeFiles/aiws_app.dir/DependInfo.cmake     |   30 +
+ .../aiws_app_autogen/mocs_compilation.cpp.o        |  Bin 0 -> 109048 bytes
+ .../aiws_app_autogen/mocs_compilation.cpp.o.d      |  367 +++
+ build/CMakeFiles/aiws_app.dir/build.make           |  213 ++
+ build/CMakeFiles/aiws_app.dir/cmake_clean.cmake    |   28 +
+ .../aiws_app.dir/cmake_clean_target.cmake          |    3 +
+ .../aiws_app.dir/compiler_depend.internal          | 1678 +++++++++++
+ build/CMakeFiles/aiws_app.dir/compiler_depend.make | 2996 ++++++++++++++++++++
+ build/CMakeFiles/aiws_app.dir/compiler_depend.ts   |    2 +
+ build/CMakeFiles/aiws_app.dir/depend.make          |    2 +
+ build/CMakeFiles/aiws_app.dir/flags.make           |   10 +
+ build/CMakeFiles/aiws_app.dir/link.txt             |    2 +
+ build/CMakeFiles/aiws_app.dir/progress.make        |   10 +
+ .../aiws_app.dir/src/context_widget.cpp.o          |  Bin 0 -> 51880 bytes
+ .../aiws_app.dir/src/context_widget.cpp.o.d        |  393 +++
+ .../CMakeFiles/aiws_app.dir/src/main_window.cpp.o  |  Bin 0 -> 163392 bytes
+ .../aiws_app.dir/src/main_window.cpp.o.d           |  412 +++
+ .../aiws_app.dir/src/search_result_model.cpp.o     |  Bin 0 -> 38768 bytes
+ .../aiws_app.dir/src/search_result_model.cpp.o.d   |  304 ++
+ .../aiws_app.dir/src/search_widget.cpp.o           |  Bin 0 -> 89336 bytes
+ .../aiws_app.dir/src/search_widget.cpp.o.d         |  416 +++
+ .../aiws_app.dir/src/term_inspector_widget.cpp.o   |  Bin 0 -> 44536 bytes
+ .../aiws_app.dir/src/term_inspector_widget.cpp.o.d |  367 +++
+ .../aiws_app.dir/src/workspace_widget.cpp.o        |  Bin 0 -> 45640 bytes
+ .../aiws_app.dir/src/workspace_widget.cpp.o.d      |  407 +++
+ .../aiws_app_autogen.dir/AutogenInfo.json          |  374 +++
+ .../aiws_app_autogen.dir/AutogenUsed.txt           |    1 +
+ .../aiws_app_autogen.dir/DependInfo.cmake          |   23 +
+ .../CMakeFiles/aiws_app_autogen.dir/ParseCache.txt | 2435 ++++++++++++++++
+ build/CMakeFiles/aiws_app_autogen.dir/build.make   |   93 +
+ .../aiws_app_autogen.dir/cmake_clean.cmake         |   10 +
+ .../aiws_app_autogen.dir/compiler_depend.internal  |  632 +++++
+ .../aiws_app_autogen.dir/compiler_depend.make      | 1885 ++++++++++++
+ .../aiws_app_autogen.dir/compiler_depend.ts        |    2 +
+ .../CMakeFiles/aiws_app_autogen.dir/progress.make  |    2 +
+ .../DependInfo.cmake                               |   22 +
+ .../aiws_app_autogen_timestamp_deps.dir/build.make |   88 +
+ .../cmake_clean.cmake                              |    8 +
+ .../compiler_depend.make                           |    2 +
+ .../compiler_depend.ts                             |    2 +
+ .../progress.make                                  |    1 +
+ build/CMakeFiles/aiws_m2.dir/DependInfo.cmake      |   32 +
+ .../aiws_m2_autogen/mocs_compilation.cpp.o         |  Bin 0 -> 944 bytes
+ .../aiws_m2_autogen/mocs_compilation.cpp.o.d       |    3 +
+ build/CMakeFiles/aiws_m2.dir/build.make            |  245 ++
+ build/CMakeFiles/aiws_m2.dir/cmake_clean.cmake     |   32 +
+ .../aiws_m2.dir/cmake_clean_target.cmake           |    3 +
+ .../aiws_m2.dir/compiler_depend.internal           | 1569 ++++++++++
+ build/CMakeFiles/aiws_m2.dir/compiler_depend.make  | 2451 ++++++++++++++++
+ build/CMakeFiles/aiws_m2.dir/compiler_depend.ts    |    2 +
+ build/CMakeFiles/aiws_m2.dir/depend.make           |    2 +
+ build/CMakeFiles/aiws_m2.dir/flags.make            |   10 +
+ build/CMakeFiles/aiws_m2.dir/link.txt              |    2 +
+ build/CMakeFiles/aiws_m2.dir/progress.make         |   12 +
+ build/CMakeFiles/aiws_m2.dir/src/chunker.cpp.o     |  Bin 0 -> 56520 bytes
+ build/CMakeFiles/aiws_m2.dir/src/chunker.cpp.o.d   |  132 +
+ .../aiws_m2.dir/src/context_builder.cpp.o          |  Bin 0 -> 134688 bytes
+ .../aiws_m2.dir/src/context_builder.cpp.o.d        |  138 +
+ .../CMakeFiles/aiws_m2.dir/src/corpus_index.cpp.o  |  Bin 0 -> 272552 bytes
+ .../aiws_m2.dir/src/corpus_index.cpp.o.d           |  133 +
+ build/CMakeFiles/aiws_m2.dir/src/document.cpp.o    |  Bin 0 -> 3000 bytes
+ build/CMakeFiles/aiws_m2.dir/src/document.cpp.o.d  |  117 +
+ .../aiws_m2.dir/src/processing_core.cpp.o          |  Bin 0 -> 450384 bytes
+ .../aiws_m2.dir/src/processing_core.cpp.o.d        |  175 ++
+ .../aiws_m2.dir/src/retrieval_engine.cpp.o         |  Bin 0 -> 261272 bytes
+ .../aiws_m2.dir/src/retrieval_engine.cpp.o.d       |  166 ++
+ .../aiws_m2.dir/src/text_processor.cpp.o           |  Bin 0 -> 67720 bytes
+ .../aiws_m2.dir/src/text_processor.cpp.o.d         |  128 +
+ build/CMakeFiles/aiws_m2.dir/src/workspace.cpp.o   |  Bin 0 -> 25056 bytes
+ build/CMakeFiles/aiws_m2.dir/src/workspace.cpp.o.d |  122 +
+ .../aiws_m2_autogen.dir/AutogenInfo.json           |  327 +++
+ .../CMakeFiles/aiws_m2_autogen.dir/AutogenUsed.txt |    1 +
+ .../aiws_m2_autogen.dir/DependInfo.cmake           |   23 +
+ .../CMakeFiles/aiws_m2_autogen.dir/ParseCache.txt  |    9 +
+ build/CMakeFiles/aiws_m2_autogen.dir/build.make    |   93 +
+ .../aiws_m2_autogen.dir/cmake_clean.cmake          |   10 +
+ .../aiws_m2_autogen.dir/compiler_depend.internal   |  209 ++
+ .../aiws_m2_autogen.dir/compiler_depend.make       |  616 ++++
+ .../aiws_m2_autogen.dir/compiler_depend.ts         |    2 +
+ build/CMakeFiles/aiws_m2_autogen.dir/progress.make |    2 +
+ .../DependInfo.cmake                               |   22 +
+ .../aiws_m2_autogen_timestamp_deps.dir/build.make  |   86 +
+ .../cmake_clean.cmake                              |    8 +
+ .../compiler_depend.make                           |    2 +
+ .../compiler_depend.ts                             |    2 +
+ .../progress.make                                  |    1 +
+ build/CMakeFiles/cmake.check_cache                 |    1 +
+ build/CMakeFiles/progress.marks                    |    1 +
+ .../CMakeFiles/student_tests.dir/DependInfo.cmake  |   25 +
+ build/CMakeFiles/student_tests.dir/build.make      |  140 +
+ .../CMakeFiles/student_tests.dir/cmake_clean.cmake |   18 +
+ .../student_tests.dir/compiler_depend.internal     |  202 ++
+ .../student_tests.dir/compiler_depend.make         |  595 ++++
+ .../student_tests.dir/compiler_depend.ts           |    2 +
+ build/CMakeFiles/student_tests.dir/depend.make     |    2 +
+ build/CMakeFiles/student_tests.dir/flags.make      |   10 +
+ build/CMakeFiles/student_tests.dir/link.txt        |    1 +
+ build/CMakeFiles/student_tests.dir/progress.make   |    5 +
+ .../student_tests_autogen/mocs_compilation.cpp.o   |  Bin 0 -> 944 bytes
+ .../student_tests_autogen/mocs_compilation.cpp.o.d |    3 +
+ .../student_tests.dir/tests/student_tests.cpp.o    |  Bin 0 -> 1232 bytes
+ .../student_tests.dir/tests/student_tests.cpp.o.d  |    2 +
+ .../student_tests_autogen.dir/AutogenInfo.json     |  340 +++
+ .../student_tests_autogen.dir/AutogenUsed.txt      |    1 +
+ .../student_tests_autogen.dir/DependInfo.cmake     |   23 +
+ .../student_tests_autogen.dir/ParseCache.txt       |    2 +
+ .../student_tests_autogen.dir/build.make           |   93 +
+ .../student_tests_autogen.dir/cmake_clean.cmake    |   10 +
+ .../student_tests_autogen.dir/compiler_depend.make |    2 +
+ .../student_tests_autogen.dir/compiler_depend.ts   |    2 +
+ .../student_tests_autogen.dir/progress.make        |    2 +
+ .../DependInfo.cmake                               |   22 +
+ .../build.make                                     |   88 +
+ .../cmake_clean.cmake                              |    8 +
+ .../compiler_depend.make                           |    2 +
+ .../compiler_depend.ts                             |    2 +
+ .../progress.make                                  |    1 +
+ build/CTestTestfile.cmake                          |    8 +
+ build/Makefile                                     |  859 ++++++
+ build/Testing/Temporary/CTestCostData.txt          |    2 +
+ build/Testing/Temporary/LastTest.log               |   18 +
+ build/ai_workspace_m4                              |  Bin 0 -> 597632 bytes
+ build/ai_workspace_m4_autogen/deps                 |  198 ++
+ build/ai_workspace_m4_autogen/moc_predefs.h        |  466 +++
+ build/ai_workspace_m4_autogen/mocs_compilation.cpp |    3 +
+ build/ai_workspace_m4_autogen/timestamp            |    0
+ .../YHJIA4DBD4/moc_context_widget.cpp              |  174 ++
+ .../YHJIA4DBD4/moc_context_widget.cpp.d            |  407 +++
+ .../YHJIA4DBD4/moc_main_window.cpp                 |  229 ++
+ .../YHJIA4DBD4/moc_main_window.cpp.d               |  415 +++
+ .../YHJIA4DBD4/moc_search_result_model.cpp         |   99 +
+ .../YHJIA4DBD4/moc_search_result_model.cpp.d       |  373 +++
+ .../YHJIA4DBD4/moc_search_widget.cpp               |  257 ++
+ .../YHJIA4DBD4/moc_search_widget.cpp.d             |  407 +++
+ .../YHJIA4DBD4/moc_term_inspector_widget.cpp       |  166 ++
+ .../YHJIA4DBD4/moc_term_inspector_widget.cpp.d     |  407 +++
+ .../YHJIA4DBD4/moc_workspace_widget.cpp            |  192 ++
+ .../YHJIA4DBD4/moc_workspace_widget.cpp.d          |  406 +++
+ build/aiws_app_autogen/deps                        |  628 ++++
+ build/aiws_app_autogen/moc_predefs.h               |  466 +++
+ build/aiws_app_autogen/mocs_compilation.cpp        |    7 +
+ build/aiws_app_autogen/timestamp                   |    0
+ build/aiws_m2_autogen/deps                         |  205 ++
+ build/aiws_m2_autogen/moc_predefs.h                |  462 +++
+ build/aiws_m2_autogen/mocs_compilation.cpp         |    3 +
+ build/aiws_m2_autogen/timestamp                    |    0
+ build/cmake_install.cmake                          |   54 +
+ build/libaiws_app.a                                |  Bin 0 -> 600846 bytes
+ build/libaiws_m2.a                                 |  Bin 0 -> 1514842 bytes
+ build/student_tests                                |  Bin 0 -> 15832 bytes
+ build/student_tests_autogen/deps                   |  198 ++
+ build/student_tests_autogen/moc_predefs.h          |  469 +++
+ build/student_tests_autogen/mocs_compilation.cpp   |    3 +
+ build/student_tests_autogen/timestamp              |    0
+ data/public/doc_ai.txt                             |    6 +-
+ data/public/doc_retrieval.txt                      |    6 +-
+ data/public/doc_systems.txt                        |    6 +-
+ data/public/queries.txt                            |    8 +-
+ include/aiws/chunker.hpp                           |   50 +-
+ include/aiws/chunking_strategy.hpp                 |   36 +-
+ include/aiws/context_builder.hpp                   |   26 +-
+ include/aiws/context_strategy.hpp                  |   34 +-
+ include/aiws/corpus_index.hpp                      |   72 +-
+ include/aiws/document.hpp                          |   44 +-
+ include/aiws/gui/context_widget.hpp                |  150 +-
+ include/aiws/gui/main_window.hpp                   |  319 +--
+ include/aiws/gui/resettable.hpp                    |   44 +-
+ include/aiws/gui/search_result_model.hpp           |  168 +-
+ include/aiws/gui/search_widget.hpp                 |  210 +-
+ include/aiws/gui/term_inspector_widget.hpp         |  162 +-
+ include/aiws/gui/workspace_widget.hpp              |  202 +-
+ include/aiws/processing_core.hpp                   |  106 +-
+ include/aiws/processing_types.hpp                  |   76 +-
+ include/aiws/retrieval_engine.hpp                  |   36 +-
+ include/aiws/retrieval_strategy.hpp                |   40 +-
+ include/aiws/text_processor.hpp                    |   58 +-
+ include/aiws/workspace.hpp                         |   38 +-
+ src/chunker.cpp                                    |  116 +-
+ src/context_builder.cpp                            |   56 +-
+ src/context_widget.cpp                             |  198 +-
+ src/corpus_index.cpp                               |  142 +-
+ src/document.cpp                                   |   26 +-
+ src/main.cpp                                       |   46 +-
+ src/main_window.cpp                                |  643 +++--
+ src/processing_core.cpp                            |  216 +-
+ src/retrieval_engine.cpp                           |  170 +-
+ src/search_result_model.cpp                        |  176 +-
+ src/search_widget.cpp                              |  324 +--
+ src/term_inspector_widget.cpp                      |  176 +-
+ src/text_processor.cpp                             |  230 +-
+ src/workspace.cpp                                  |   32 +-
+ src/workspace_widget.cpp                           |  218 +-
+ tests/student_tests.cpp                            |    4 +-
+ 238 files changed, 37045 insertions(+), 2415 deletions(-)
+
+commit 9130d616bd96ce7a8c9708e65f49d2ba3d956c1d
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-10-28 16:31:14 -0400
+
+    finished design note
+
+ DESIGN_NOTE.md | 25 +++++++++++++++++++++++++
+ 1 file changed, 25 insertions(+)
+
+commit 031c6f7d5c22ca6ef916f4246c00e8be68e4d847
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-10-27 13:58:39 -0400
+
+    initial commit with m4 starter code and m3 code
+
+ CMakeLists.txt                             |  57 +++++++++++
+ DESIGN.md                                  |   3 +
+ DESIGN_NOTE.md                             |   3 +
+ data/public/doc_ai.txt                     |   3 +
+ data/public/doc_retrieval.txt              |   3 +
+ data/public/doc_systems.txt                |   3 +
+ data/public/queries.txt                    |   4 +
+ include/aiws/chunker.hpp                   |  25 +++++
+ include/aiws/chunking_strategy.hpp         |  18 ++++
+ include/aiws/context_builder.hpp           |  13 +++
+ include/aiws/context_strategy.hpp          |  17 +++
+ include/aiws/corpus_index.hpp              |  36 +++++++
+ include/aiws/document.hpp                  |  22 ++++
+ include/aiws/gui/context_widget.hpp        |  75 ++++++++++++++
+ include/aiws/gui/main_window.hpp           | 159 +++++++++++++++++++++++++++++
+ include/aiws/gui/resettable.hpp            |  22 ++++
+ include/aiws/gui/search_result_model.hpp   |  84 +++++++++++++++
+ include/aiws/gui/search_widget.hpp         | 105 +++++++++++++++++++
+ include/aiws/gui/term_inspector_widget.hpp |  81 +++++++++++++++
+ include/aiws/gui/workspace_widget.hpp      | 101 ++++++++++++++++++
+ include/aiws/processing_core.hpp           |  53 ++++++++++
+ include/aiws/processing_types.hpp          |  38 +++++++
+ include/aiws/retrieval_engine.hpp          |  18 ++++
+ include/aiws/retrieval_strategy.hpp        |  20 ++++
+ include/aiws/text_processor.hpp            |  29 ++++++
+ include/aiws/workspace.hpp                 |  19 ++++
+ tests/student_tests.cpp                    |   2 +
+ 27 files changed, 1013 insertions(+)
+
+commit 225203f895f1dfb6ae2427c80fe3c4434a6ecd7d
+Author: Patrick Rooney <patrickr157@vt.edu>
+Date:   2026-10-27 13:57:26 -0400
+
+    initial commit with starter code and m3 code
+
+ .gitignore                                 |   0
+ CMakeLists.txt                             |   0
+ DESIGN.md                                  |   0
+ DESIGN_NOTE.md                             |   0
+ STARTER_README.pdf                         | Bin 0 -> 39600 bytes
+ data/public/doc_ai.txt                     |   0
+ data/public/doc_retrieval.txt              |   0
+ data/public/doc_systems.txt                |   0
+ data/public/queries.txt                    |   0
+ include/aiws/chunker.hpp                   |   0
+ include/aiws/chunking_strategy.hpp         |   0
+ include/aiws/context_builder.hpp           |   0
+ include/aiws/context_strategy.hpp          |   0
+ include/aiws/corpus_index.hpp              |   0
+ include/aiws/document.hpp                  |   0
+ include/aiws/gui/context_widget.hpp        |   0
+ include/aiws/gui/main_window.hpp           |   0
+ include/aiws/gui/resettable.hpp            |   0
+ include/aiws/gui/search_result_model.hpp   |   0
+ include/aiws/gui/search_widget.hpp         |   0
+ include/aiws/gui/term_inspector_widget.hpp |   0
+ include/aiws/gui/workspace_widget.hpp      |   0
+ include/aiws/processing_core.hpp           |   0
+ include/aiws/processing_types.hpp          |   0
+ include/aiws/retrieval_engine.hpp          |   0
+ include/aiws/retrieval_strategy.hpp        |   0
+ include/aiws/text_processor.hpp            |   0
+ include/aiws/workspace.hpp                 |   0
+ src/chunker.cpp                            |  59 ++++++
+ src/context_builder.cpp                    |  29 +++
+ src/context_widget.cpp                     |  99 +++++++++
+ src/corpus_index.cpp                       |  72 +++++++
+ src/document.cpp                           |  14 ++
+ src/main.cpp                               |  23 +++
+ src/main_window.cpp                        | 314 +++++++++++++++++++++++++++++
+ src/processing_core.cpp                    | 109 ++++++++++
+ src/retrieval_engine.cpp                   |  86 ++++++++
+ src/search_result_model.cpp                |  88 ++++++++
+ src/search_widget.cpp                      | 162 +++++++++++++++
+ src/term_inspector_widget.cpp              |  88 ++++++++
+ src/text_processor.cpp                     | 116 +++++++++++
+ src/workspace.cpp                          |  17 ++
+ src/workspace_widget.cpp                   | 109 ++++++++++
+ tests/student_tests.cpp                    |   0
+ 44 files changed, 1385 insertions(+)
+(END)
+ DESIGN_NOTE.md                             |   0
+ STARTER_README.pdf                         | Bin 0 -> 39600 bytes
+ data/public/doc_ai.txt                     |   0
+ data/public/doc_retrieval.txt              |   0
+ data/public/doc_systems.txt                |   0
+:
+ DESIGN_NOTE.md                             |   0
+ STARTER_README.pdf                         | Bin 0 -> 39600 bytes
+ data/public/doc_ai.txt                     |   0
+ data/public/doc_retrieval.txt              |   0
+ data/public/doc_systems.txt                |   0
+ data/public/queries.txt                    |   0
+ include/aiws/chunker.hpp                   |   0
+ include/aiws/chunking_strategy.hpp         |   0
+ include/aiws/context_builder.hpp           |   0
+ include/aiws/context_strategy.hpp          |   0
+ include/aiws/corpus_index.hpp              |   0
+ include/aiws/document.hpp                  |   0
+ include/aiws/gui/context_widget.hpp        |   0
+ include/aiws/gui/main_window.hpp           |   0
+ include/aiws/gui/resettable.hpp            |   0
+ include/aiws/gui/search_result_model.hpp   |   0
+ include/aiws/gui/search_widget.hpp         |   0
+ include/aiws/gui/term_inspector_widget.hpp |   0
+ include/aiws/gui/workspace_widget.hpp      |   0
+ include/aiws/processing_core.hpp           |   0
+ include/aiws/processing_types.hpp          |   0
+ include/aiws/retrieval_engine.hpp          |   0
+ include/aiws/retrieval_strategy.hpp        |   0
+ include/aiws/text_processor.hpp            |   0
+ include/aiws/workspace.hpp                 |   0
+ src/chunker.cpp                            |  59 ++++++
+ src/context_builder.cpp                    |  29 +++
+ src/context_widget.cpp                     |  99 +++++++++
+ src/corpus_index.cpp                       |  72 +++++++
+ src/document.cpp                           |  14 ++
+ src/main.cpp                               |  23 +++
+ src/main_window.cpp                        | 314 +++++++++++++++++++++++++++++
+ src/processing_core.cpp                    | 109 ++++++++++
+ src/retrieval_engine.cpp                   |  86 ++++++++
+ src/search_result_model.cpp                |  88 ++++++++
+ src/search_widget.cpp                      | 162 +++++++++++++++
+ src/term_inspector_widget.cpp              |  88 ++++++++
+ src/text_processor.cpp                     | 116 +++++++++++
+ src/workspace.cpp                          |  17 ++
+ src/workspace_widget.cpp                   | 109 ++++++++++
+ tests/student_tests.cpp                    |   0
+ 44 files changed, 1385 insertions(+)
+(END)

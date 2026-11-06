@@ -1,0 +1,3 @@
+build/
+*.sock
+doc_*.txt
