@@ -6,6 +6,8 @@
 #include <memory>
 #include <cstdint>
 #include <string>
+#include <condition_variable>
+#include <mutex>
 
 #include "aiws/processing_core.hpp"
 #include "aiws/workspace.hpp"
@@ -136,6 +138,22 @@ private slots:
     void exit_application();
 
 private:
+
+    struct BuildCoordinator {
+        std::mutex mutex;
+        std::condition_variable cv;
+        
+        //data to be guarded by mutex
+        bool shutdown{false};
+        bool has_job{false};
+        Workspace pending_workspace;
+        uint64_t job_generation{0};
+        int build_delay_ms{0};
+
+        std::atomic<bool> cancel_requested{false};
+    };
+
+    BuildCoordinator coord_;
     /**
      * @brief Updates availability of actions that depend on current application state.
      */
@@ -157,6 +175,10 @@ private:
     void start_ipc_server();
     void stop_ipc_server();
     void ipc_server_loop();
+
+    void worker_loop();
+    void cancel_active_build();
+    void stop_worker();
 
     Workspace workspace_;
     ProcessingCore processing_core_;

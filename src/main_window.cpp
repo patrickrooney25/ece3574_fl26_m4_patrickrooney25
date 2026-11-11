@@ -149,14 +149,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_application);
     connect(exit_button_, &QPushButton::clicked, this, &MainWindow::exit_application);
 
+    worker_thread_ = std::thread(MainWindow::worker_loop, this);
     reset_application();
 }
 
 MainWindow::~MainWindow() {
+    stop_worker();
     stop_ipc_server();
-    if(worker_thread_.joinable()) {
-        worker_thread_.join();
-    }
 }
 
 void MainWindow::set_exit_callback(ExitCallback callback) noexcept {
@@ -429,6 +428,84 @@ void MainWindow::on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_co
     status_label_->setText("<b>Current status:</b> Corpus built successfully.");
 
 }
+
+void MainWindow::cancel_active_build(){
+    coord_.cancel_requested.store(true);
+}
+
+void MainWindow::stop_worker(){
+    {
+        std::lock_guard<std::mutex> lock(coord_.mutex);
+        coord_.shutdown=true;
+        coord_.cancel_requested.store(true);
+#ifndef AIWS_FAULT_SILENT_SHUTDOWN
+        coord_.cv.notify_all();
+#endif
+    }
+    if(worker_thread_.joinable()){
+        worker_thread_.join();
+    }
+}
+
+void MainWindow::worker_loop(){
+    while(true){
+        Workspace ws;
+        uint64_t gen=0;
+        int delay=0;
+        {
+            std::unique_lock<std::mutex> lock(woord_.mutex);
+            coord_.cv.wait(lock, [this](){
+                return coord_.shutdown || coord_.has_job;
+            });
+            if(coord_.shutdown){
+                return;
+            }
+
+            ws =std::move(coord_.pending_workspace);
+            gen =coord_.job_generation;
+            delay= coord_.build_delay_ms;
+            coord_.has_job=false;
+            coord_.cancel_requested.store(false);
+        }
+
+        auto core= std::make_shared<aiws::ProcessingCore>();
+        bool cancelled=false;
+        bool success = true;
+        QString err_msg;
+
+        try {
+            const auto& docs = ws.documents();
+            for(std::size_t i=0; i<docs.size(); ++i){
+#ifndef AIWS_FAULT_NO_CANCEL
+                if(coord_cancel_requested.load()||coord_.shutdown){
+                    cancelled=true;
+                    break;
+                }
+#endif
+                if(delay>0){
+                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+                }
+            }
+
+            if(!cancelled){
+                core->rebuild(ws);
+            }
+        } catch(const std::exceptions& e){
+            success=false;
+            err_msg = QString::fromStdString(e.what());
+        } catch(...){
+            success = false;
+            error_msg = "Unknown error during rebuild";
+        }
+
+        //post result only if build wasn't cancelled
+        if (!cancelled){
+            QMetaObject::invokeMethod(this, [this, core=std::move(core), success, err_msg] mutable{
+                this->on_build_completed(std::move(core), gen, success, err_msg);}, Qt::QueuedConnection);            
+        }
+    }
+}
+
 
 void MainWindow::set_ipc_socket_path(const std::string& path){
     ipc_socket_path_ = path;
