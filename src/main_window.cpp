@@ -186,6 +186,8 @@ void MainWindow::add_document() {
     Document doc(doc_id, doc_title, doc_text);
     workspace_.add_document(std::move(doc));
 
+    cancel_active_build();
+
     workspace_widget_->add_document(QString::fromStdString(doc_id));
     invalidate_corpus();
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
@@ -208,6 +210,8 @@ bool MainWindow::add_document_file(const QString& path){
     Document doc(doc_id, doc_title, doc_text);
     workspace_.add_document(std::move(doc));
 
+    cancel_active_build();
+
     workspace_widget_->add_document(QString::fromStdString(doc_id));
     invalidate_corpus();
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
@@ -222,10 +226,8 @@ void MainWindow::build_corpus() {
     if (workspace_.documents().empty()) {
         return;
     }
-
-    if (worker_thread_.joinable()) { //join build thread before launching another
-        worker_thread_.join();
-    }
+    //cancel anything running before new build
+    cancel_active_build();
 
     const uint64_t build_gen = current_generation_.load(); 
     //snapshot workspace
@@ -237,33 +239,17 @@ void MainWindow::build_corpus() {
     status_label_->setText("<b>Current status:</b> Building corpus...");
     update_action_states();
 
-    //launch background worker thread
-    worker_thread_=std::thread([this, snapshot = std::move(snapshot), build_gen, delay]() mutable{
-        //heap ownership
-        auto core = std::make_shared<aiws::ProcessingCore>();
-        bool success = true;
-        QString error_msg;
-
-        try{
-            if (delay>0){ //artificial delay
-                for (std::size_t i=0; i<snapshot.documents().size(); i++){
-                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
-                }
-            }
-            core->rebuild(snapshot);
-        }catch(const std::exception& e){ //get exceptions to report failure
-            success =false;
-            error_msg=QString::fromStdString(e.what());
-        }catch(...){
-            success=false;
-            error_msg="Unkown build failure.";
-        }
-
-        //completion back to gui event loop
-        QMetaObject::invokeMethod(this, [this, core=std::move(core), build_gen, success, error_msg](){
-            on_build_completed(std::move(core), build_gen, success, error_msg);
-        });
-    });
+    //hand off to the persistent worker thread
+    {
+        std::lock_guard<std::mutex> lock(coord_.mutex);
+        coord_.pending_workspace = std::move(snapshot);
+        coord_.job_generation=build_gen;
+        coord_.build_delay_ms = delay;
+        coord_.has_job = true;
+    }
+    
+    //wake up worker
+    coord_.cv.notify_one()
 }
 
 
@@ -334,9 +320,7 @@ void MainWindow::term_inspection_requested(const QString& term,
 }
 
 void MainWindow::reset_application() {
-    if(worker_thread_.joinable()) {
-        worker_thread_.join();
-    }
+    cancel_active_build();
     
     workspace_.clear();
     corpus_current_ = false;
@@ -355,9 +339,6 @@ void MainWindow::reset_application() {
 void MainWindow::exit_application() {
     auto reply = QMessageBox::question(this, "Exit", "Are you sure you want to exit?");
     if(reply== QMessageBox::Yes) {
-        if(worker_thread_.joinable()) {
-            worker_thread_.join();
-        }
         if(exit_callback_!=nullptr) {
             exit_callback_(this);
         }
