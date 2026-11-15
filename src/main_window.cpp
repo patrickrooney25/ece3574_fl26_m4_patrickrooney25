@@ -149,7 +149,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     connect(reset_button_, &QPushButton::clicked, this, &MainWindow::reset_application);
     connect(exit_button_, &QPushButton::clicked, this, &MainWindow::exit_application);
 
-    worker_thread_ = std::thread(MainWindow::worker_loop, this);
+    state_ = std::make_unique<NotBuiltState>(false);
+    worker_thread_ = std::thread(&MainWindow::worker_loop, this);
     reset_application();
 }
 
@@ -186,10 +187,9 @@ void MainWindow::add_document() {
     Document doc(doc_id, doc_title, doc_text);
     workspace_.add_document(std::move(doc));
 
-    cancel_active_build();
-
     workspace_widget_->add_document(QString::fromStdString(doc_id));
-    invalidate_corpus();
+    current_generation_++;
+    state_->on_document_added(*this);
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
 }
 
@@ -210,10 +210,9 @@ bool MainWindow::add_document_file(const QString& path){
     Document doc(doc_id, doc_title, doc_text);
     workspace_.add_document(std::move(doc));
 
-    cancel_active_build();
-
     workspace_widget_->add_document(QString::fromStdString(doc_id));
-    invalidate_corpus();
+    current_generation_++;
+    state_->on_document_added(*this);
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
     return true;
 }
@@ -226,30 +225,7 @@ void MainWindow::build_corpus() {
     if (workspace_.documents().empty()) {
         return;
     }
-    //cancel anything running before new build
-    cancel_active_build();
-
-    const uint64_t build_gen = current_generation_.load(); 
-    //snapshot workspace
-    Workspace snapshot = workspace_;
-    const int delay = build_delay_ms_;
-
-    //update UI to building
-    workspace_widget_->set_corpus_status("Corpus: <b>Building...</b>");
-    status_label_->setText("<b>Current status:</b> Building corpus...");
-    update_action_states();
-
-    //hand off to the persistent worker thread
-    {
-        std::lock_guard<std::mutex> lock(coord_.mutex);
-        coord_.pending_workspace = std::move(snapshot);
-        coord_.job_generation=build_gen;
-        coord_.build_delay_ms = delay;
-        coord_.has_job = true;
-    }
-    
-    //wake up worker
-    coord_.cv.notify_one()
+    state_->on_build_requested(*this);
 }
 
 
@@ -263,7 +239,7 @@ void MainWindow::document_selected(int row) {
 }
 
 void MainWindow::search_requested(const QString& query, int k) {
-    if(!corpus_current_ || query.trimmed().isEmpty()){
+    if(!state_->is_corpus_current() || query.trimmed().isEmpty()){
         return;
     }
 
@@ -278,7 +254,7 @@ void MainWindow::query_changed(const QString& query) {
 }
 
 void MainWindow::build_context_requested(int token_budget) {
-    if(!corpus_current_ || !search_widget_->has_query()) {
+    if(!state_->is_corpus_current() || !search_widget_->has_query()) {
         return;
     }
 
@@ -302,7 +278,7 @@ void MainWindow::source_document_requested(const QString& document_id) {
 
 void MainWindow::term_inspection_requested(const QString& term,
                                            const QString& chunk_id) {
-    if(!corpus_current_){
+    if(!state_->is_corpus_current()){
         return;
     }
 
@@ -320,20 +296,7 @@ void MainWindow::term_inspection_requested(const QString& term,
 }
 
 void MainWindow::reset_application() {
-    cancel_active_build();
-    
-    workspace_.clear();
-    corpus_current_ = false;
-    current_generation_++;
-
-    workspace_widget_->reset();
-    context_widget_->reset();
-    search_widget_->reset();
-    term_inspector_widget_->reset();
-    
-    workspace_widget_->set_corpus_status("Corpus: <b>Not Built</b>");
-    status_label_->setText("<b>Current status:</b> Ready");
-    update_action_states();
+    state_->on_reset(*this);
 }
 
 void MainWindow::exit_application() {
@@ -351,19 +314,12 @@ void MainWindow::exit_application() {
 void MainWindow::update_action_states() {
     const bool has_documents =!workspace_.documents().empty();
     const bool has_query = search_widget_->has_query();
+    const bool is_current= state_->is_corpus_current();
 
     workspace_widget_->set_build_corpus_enabled(has_documents);
-    search_widget_->set_search_enabled(corpus_current_ && has_query);
-    term_inspector_widget_->set_inspection_enabled(corpus_current_);
-    context_widget_->set_build_context_enabled(corpus_current_ && has_query);
-}
-
-void MainWindow::invalidate_corpus() {
-    corpus_current_=false;
-    current_generation_++;
-    workspace_widget_->set_corpus_status("Corpus: <b> Rebuild Required</b>");
-    clear_processing_outputs();
-    update_action_states();
+    search_widget_->set_search_enabled(is_current && has_query);
+    term_inspector_widget_->set_inspection_enabled(is_current);
+    context_widget_->set_build_context_enabled(is_current && has_query);
 }
 
 void MainWindow::clear_processing_outputs() {
@@ -373,41 +329,65 @@ void MainWindow::clear_processing_outputs() {
 }
 
 void MainWindow::on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message){
+    state_->on_build_completed(*this, std::move(new_core), generation, success, error_message);
+}
 
-//handle build failure
-#ifndef AIWS_FAULT_LOSE_FAILURE
-    if(!success){
-        status_label_->setText(QString("<b>Current status:</b> Build failed: %1").arg(error_message));
-        workspace_widget_->set_corpus_status("Corpus: <b>Build failed</b>");
-        update_action_states();
-        return;
-    }
-#else
-    //silently drop failure
-    if(!success){
-        return;
-    }
-#endif
-
-//drop completion if newer mutation happened mid build
-#ifndef AIWS_FAULT_ACCEPT_STALE
-    if(generation!=current_generation_){
-        return;
-    }
-#endif
-
-    //move built core into active member
-    if (new_core){
-        processing_core_= std::move(*new_core);
-    }
-    //update gui on gui thread
-    corpus_current_ = true;
-    const std::size_t total_chunks = processing_core_.chunk_count();
-    workspace_widget_->set_corpus_status(QString("Corpus <b>Ready - %1 chunks</b>").arg(total_chunks));
-    clear_processing_outputs();
+void MainWindow::transition_to(std::unique_ptr<CorpusState> next_state){
+    state_ = std::move(next_state);
+    state_->on_enter(*this);
     update_action_states();
-    status_label_->setText("<b>Current status:</b> Corpus built successfully.");
+}
 
+void MainWindow::start_build_job(){
+    const uint64_t build_gen= current_generation_.load();
+    Workspace snapshot =workspace_;
+    const int delay = build_delay_ms_;
+
+    {
+        std::lock_guard<std::mutex> lock(coord_.mutex);
+        coord_.pending_workspace=std::move(snapshot);
+        coord_.job_generation = build_gen;
+        coord_.build_delay_ms = delay;
+        coord_.has_job=true;
+    }
+    coord_.cv.notify_one();
+}
+
+void MainWindow::cancel_build_job(){
+    cancel_active_build();
+}
+
+void MainWindow::apply_built_core(std::shared_ptr<aiws::ProcessingCore> new_core){
+    if(new_core){
+        processing_core_ = std::move(*new_core);
+    }
+    const std::size_t total_chunks=processing_core_.chunk_count();
+    workspace_widget_->set_corpus_status(QString("Corpus: <b>Ready - %1 chunks</b>").arg(total_chunks));
+}
+
+void MainWindow::update_corpus_ui(const QString& corpus_status, const QString& window_status, bool clear_outputs){
+    if(!corpus_status.isEmpty()){
+        workspace_widget_->set_corpus_status(corpus_status);
+    }
+    if(!window_status.isEmpty()){
+        status_label_->setText(window_status);
+    }
+    if(clear_outputs){
+        clear_processing_outputs();
+    }
+    update_action_states();
+}
+
+void MainWindow::perform_reset(){
+    workspace_.clear();
+    current_generation_++;
+
+    workspace_widget_->reset();
+    context_widget_->reset();
+    search_widget_->reset();
+    term_inspector_widget_->reset();
+
+    transition_to(std::make_unique<NotBuiltState>(false));
 }
 
 void MainWindow::cancel_active_build(){
@@ -434,7 +414,7 @@ void MainWindow::worker_loop(){
         uint64_t gen=0;
         int delay=0;
         {
-            std::unique_lock<std::mutex> lock(woord_.mutex);
+            std::unique_lock<std::mutex> lock(coord_.mutex);
             coord_.cv.wait(lock, [this](){
                 return coord_.shutdown || coord_.has_job;
             });
@@ -442,6 +422,7 @@ void MainWindow::worker_loop(){
                 return;
             }
 
+            //hand off queued job
             ws =std::move(coord_.pending_workspace);
             gen =coord_.job_generation;
             delay= coord_.build_delay_ms;
@@ -458,7 +439,7 @@ void MainWindow::worker_loop(){
             const auto& docs = ws.documents();
             for(std::size_t i=0; i<docs.size(); ++i){
 #ifndef AIWS_FAULT_NO_CANCEL
-                if(coord_cancel_requested.load()||coord_.shutdown){
+                if(coord_.cancel_requested.load()||coord_.shutdown){
                     cancelled=true;
                     break;
                 }
@@ -471,17 +452,17 @@ void MainWindow::worker_loop(){
             if(!cancelled){
                 core->rebuild(ws);
             }
-        } catch(const std::exceptions& e){
+        } catch(const std::exception& e){
             success=false;
             err_msg = QString::fromStdString(e.what());
         } catch(...){
             success = false;
-            error_msg = "Unknown error during rebuild";
+            err_msg = "Unknown error during rebuild";
         }
 
         //post result only if build wasn't cancelled
         if (!cancelled){
-            QMetaObject::invokeMethod(this, [this, core=std::move(core), success, err_msg] mutable{
+            QMetaObject::invokeMethod(this, [this, core=std::move(core), gen, success, err_msg]() mutable{
                 this->on_build_completed(std::move(core), gen, success, err_msg);}, Qt::QueuedConnection);            
         }
     }

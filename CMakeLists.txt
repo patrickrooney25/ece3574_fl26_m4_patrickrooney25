@@ -34,6 +34,8 @@ add_library(aiws_app STATIC
     src/context_widget.cpp
     src/term_inspector_widget.cpp
     src/search_result_model.cpp
+    src/corpus_state.cpp
+    include/aiws/gui/corpus_state.hpp
     include/aiws/gui/main_window.hpp
     include/aiws/gui/resettable.hpp
     include/aiws/gui/workspace_widget.hpp

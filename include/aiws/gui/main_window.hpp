@@ -11,6 +11,7 @@
 
 #include "aiws/processing_core.hpp"
 #include "aiws/workspace.hpp"
+#include "aiws/gui/corpus_state.hpp"
 
 class QLabel;
 class QPushButton;
@@ -77,6 +78,17 @@ public:
     void set_ipc_socket_path(const std::string& path);
 
     void on_build_completed(std::shared_ptr<aiws::ProcessingCore> new_core, uint64_t generation, bool success, const QString& error_message);
+
+    //state pattern helpers
+    void transition_to(std::unique_ptr<CorpusState> next_state);
+    void start_build_job();
+    void cancel_build_job();
+    void apply_built_core(std::shared_ptr<aiws::ProcessingCore> new_core);
+    void update_corpus_ui(const QString& corpus_status, const QString& window_status, bool clear_outputs);
+    uint64_t current_generation() const noexcept{
+        return current_generation_.load();
+    }
+    void perform_reset();
 
 
     // Everything below this line is the M3 design. In M4 it is yours to
@@ -182,7 +194,7 @@ private:
 
     Workspace workspace_;
     ProcessingCore processing_core_;
-    bool corpus_current_{false};
+    std::unique_ptr<CorpusState> state_;
     ExitCallback exit_callback_{nullptr};
 
     WorkspaceWidget* workspace_widget_{nullptr};

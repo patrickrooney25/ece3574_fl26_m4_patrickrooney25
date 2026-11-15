@@ -5,7 +5,9 @@
 #include <QLabel>
 #include <QProcess>
 #include <QListWidget>
+#include <QList>
 
+#include <vector>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -60,8 +62,18 @@ private slots:
 
     void test_build_failure_delivered(){
         aiws::gui::MainWindow window;
+        window.set_build_delay_ms(500);
 
-        window.on_build_completed(nullptr, 0, false, "simulated crash");
+        std::string doc = "fail_doc.txt";
+        {
+            std::ofstream out(doc);
+            out << "test content";
+        }
+        QVERIFY(window.add_document_file(QString::fromStdString(doc)));
+
+        QMetaObject::invokeMethod(&window, "build_corpus", Qt::DirectConnection);
+
+        window.on_build_completed(nullptr, window.current_generation(), false, "simulated crash");
         QCoreApplication::processEvents();
 
         bool has_failed=false;
@@ -72,6 +84,7 @@ private slots:
             }
         }
         QVERIFY2(has_failed, "failure was dropped and label never updated");
+        std::filesystem::remove(doc);
     }
 
     void test_valid_file_and_relative_path(){
@@ -149,6 +162,84 @@ private slots:
 
         QVERIFY2(elapsed_ms<500, "shudown exceeds 500ms");
         QVERIFY2(!std::filesystem::exists(sock_path), "socket file was not uplinked");
+    }
+
+    void test_cancel_mid_build(){
+        std::vector<std::string> docs = {"c1.txt", "c2.txt", "c3.txt", "c4.txt", "c5.txt", "c6.txt"};
+        for (std::size_t i=0; i<docs.size(); ++i){
+            std::ofstream out(docs[i]);
+            out << "sample text: " << docs[i];
+        }
+        std::chrono::steady_clock::time_point start;
+        {
+            aiws::gui::MainWindow window;
+            window.set_build_delay_ms(300);
+            for (std::size_t i=0; i<docs.size(); ++i){
+                QVERIFY(window.add_document_file(QString::fromStdString(docs[i])));
+            }
+
+            QMetaObject::invokeMethod(&window, "build_corpus", Qt::DirectConnection);
+            QTest::qWait(100);
+
+            start = std::chrono::steady_clock::now();
+
+            QMetaObject::invokeMethod(&window, "reset_application", Qt::DirectConnection);
+            QCoreApplication::processEvents();
+
+            bool has_not_built = false;
+            QList<QLabel*> labels = window.findChildren<QLabel*>();
+            for (int i=0; i<labels.size(); ++i){
+                if(labels[i]&&labels[i]->text().contains("Not Built")){
+                    has_not_built=true;
+                    break;
+                }
+            }
+            QVERIFY2(has_not_built, "Reset mid build did not transition to Not Built");
+        }
+
+        auto elapsed_ms =std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-start).count();
+
+        QVERIFY2(elapsed_ms<600, "Build was not cancelled within 1 doc delay");
+        for (std::size_t i=0; i<docs.size(); ++i){
+            std::filesystem::remove(docs[i]);
+        }
+    }
+
+    void test_transitions_and_rebuild_during_build(){
+        aiws::gui::MainWindow window;
+        window.set_build_delay_ms(150);
+
+        std::string d1 = "r1.txt";
+        std::string d2 = "r2.txt";
+        {
+            std::ofstream out1(d1);
+            out1 << "doc1 text";
+            std::ofstream out2(d2);
+            out2 << "doc 2 text";
+        }
+
+        QVERIFY(window.add_document_file(QString::fromStdString(d1)));
+        QMetaObject::invokeMethod(&window, "build_corpus", Qt::DirectConnection);
+        QTest::qWait(50);
+
+        QVERIFY(window.add_document_file(QString::fromStdString(d2)));
+        QMetaObject::invokeMethod(&window, "build_corpus", Qt::DirectConnection);
+
+        QTest::qWait(500);
+        QCoreApplication::processEvents();
+
+        bool has_ready=false;
+        QList<QLabel*> labels = window.findChildren<QLabel*>();
+        for (int i=0; i<labels.size(); ++i){
+            if (labels[i]&&labels[i]->text().contains("Ready -")){
+                has_ready=true;
+                break;
+            }
+        }
+        QVERIFY2(has_ready, "Second build did not complete into Ready State");
+
+        std::filesystem::remove(d1);
+        std::filesystem::remove(d2);
     }
 };
 
