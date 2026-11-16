@@ -1,46 +1,41 @@
-# M4 Decision Record
+# M5 DESIGN.md
 
-See specification Section 8.
+**1. M4 Fixes**
+None.
 
-**Threads and Ownership**
+**2. Threads and shared data**
 
-Three threads were used in the development of m4. The main GUI thread has exclusive ownership of the UI in MainWindow and all of its widgets (WorkspaceWidget, SearchWidget, TermInspectorWidget, and ContextWidget). This keeps all widget allocations, signals, and visual updates strictly on the main GUI thread. When corpus indexing is initiated through MainWindow::build_corpus(), a bakcground worker thread is made using std::thread. The worker thread uses a snapshot of the workspace and injects artificial delay (build_delay_ms_). It then executes ProcessingCore::rebuild() and communicates completion onto the main thread using QMetaObject::invokeMethod. start_ipc_server() also runs an independent thread that polls an AF_UNIX streaming socket for client commands without frezzing the GUI event loop.
+The GUI thread in MainWindow and the Qt event loop owns all widgets, workspace_, processing_core_, current_generation_, and state_. The worker thread in MainWindow::worker_loop is spawned once in the mainWindow constructor, blocks on coord_.cv when idle without busy waiting, and joins in the mainWindow destructor using stop_worker(). The ipc server thread in MainWindow::ipc_server_loop polls the UNIX domain socket adn queues add_document_file() on the GUI thread using Qt::QueuedConnection.
 
-The ownership lifecycle of a built corpus begins inside the bakground worker thread. This thread allocates the new structure as std::make_shared<aiws::ProcessingCore>(). This pointer is passed through a queued event into MainWindow::on_build_completed() when indexing is successful. The handler then confirms that the generation is current and transitions ownership to MainWindow::processing_core where the previous corpus is destroyed. The active corpus remains owned by MainWindow until overwritten by a valid build, cleared by reset_application(), or destroyed when MainWindow goes out of scope on an exit.
+All mutable data that is reachable across threads lives in BuildCoordinator and current_generation_. pending_workspace, job_generation, build_delay_ms, has_job, and shutdown are accessed by the GUI and worker thread adn are protected using std::mutex coord_.mutex. They are signaled using std::condition_variable coord_.cv. This is thread safe because all multiple field job handoffs and shutdown updates happen atomically under the same mutex lock. std::atomic<bool> coord_.cancel_requested is written by the GUI thread in cancel_build_job() and stop_worker() and read by the worker in worker_loop(). This is thread safe because single flag atomic operations give visibility without data races without also locking inside the build loop. current_generation_ is incremented on the GUI thread in add_document(), add_document_file(), and perform_reset(). It is read in start_build_job() and BuildingState::on_build_completed(). This ensures the generation does not allow for stale builds and they are safely rejected.
 
-All mutable data that is accessible accross threads is bounded and synchronized to comply with constraint 5. The generation counter (current_generation_) is defined as a std::atomic<uint64_t> and is incremented on the GUI thread and read across thread boundaries without a race condition. The server status flag (ipc_running_) is a std::atomic<bool> and written by the main thread during shutdown and read by ipc_thread_ as the termination condition. The workspace instance is also never shared. MainWindow::build_corpus() copies the workspace on the GUI thread before thread creation. This allows the worker thread ot use its own private snapshot while the GUI thread continues to modify the live workspace. Both the worker thread and ipc thread are joined before launching replacements or destroying MainWindow to ensure no detatched threads exist.
+**3. Corpus states**
+All states live exclusivley on the GUI thread. NotBuiltState(bool rebuild_required) represents and unbuilt or invalidated workspace where is_corpus_current() is false and the search, term inspector, and context are disabled. Building represents an active background build where is_corpus_current() is false. ReadyState represents a current and searchable corpus where is_corpus_current() is true. BuildFailedState(QString err) represents a failed build where is_corpus_current() is false.
 
-**Judging Finished Build Valid**
+Corpus State     |                         Event                               | Next State
+---------------------------------------------------------------------------------------------
+NotBuiltState    | on_build_requested and start_build_job                      | BuildingState
+NotBuiltState    | on_reset and perform_reset                                  | NotBuiltState(false)
+BuildingState    | on_build_completed with matching gen and success            | ReadyState
+BuildingState    | on_build_completed with matching gen and failure            | BuiledFailedState
+BuildingState    | on_build_completed with stale generation                    | BuildingState
+BuildingState    | on_document_added and cancel_build_job                      | NotBuiltState(true)
+BuildingState    | on_build_requested and cancel_build_job and start_build_job | BuildingState
+BuildingState    | on_reset and cancel_build_job and perform_reset             | NotBuiltState(false)
+ReadyState       | on_document_added with clear outputs                        | NotBuiltState(true)
+ReadyState       | on_build_requested or on_reset                              | BuildingState or NotBuiltState(false)
+BuildFailedState | on_document_added or on_build_requested or on_reset         | NotBuiltState(true) or BuildingState or NotBuiltState(false)
 
-A completed background build is accepted and allowed to update the corpus only if it reflects the current workspace stat to satisfy requirement R2. The invariant is maintained by tracking generation using current_generation_. When an event like adding a document to the GUI invalidates the corpus, current_generation_ is incremented immediately on the GUI thread. The generation number is captured and passed to the worker thread when build_corpus() initiates background indexing. on_build_completed then compares the workers generation number with the value of current_generation_ when the worker finishes. If the workspace changed or reset during indexing the values are different and causes the method to discard the build without changing the processing core or UI labels. If the generations match, the build and status labels update to show the new workspace.
+**4. Event trace**
 
-**Changes Since Checkpoint**
+This is tracing a remote add mid build. MainWindow::build_corpus() calls NotBuiltState::on_build_requested() on the GUI thread. This triggers start_build_job() to take a snapshot of workspace_, set has_job=true, notify using coord_.cv, and transition to BuildingState. worker_loop() then wakes up from coord_.cv.wait(), moves pending_workspace, and sleeps per document on the worker thread. the ipc server loop receives add from aiws_send and queues add_document_file() using Qt::QueuedConnection on the ipc thread. The GUI thread then calls add_document_file() which increments current_generation_ and calls BuildingState::on_document_added(). This invokes cancel_build_job() with has_job=false and cancel_requested=true and transitions to NotBuiltState(true). The next worker thread loop iteration sees cancel_requested is true and breaks early without posting a completion and waits on coord_.cv.
 
-A few aspects of my design changed since submitting my design note. In my initial design, I planned to allocate the core inside the inside the worker thread as a std::unique_ptr<ProcessingCore> and move the pointer through the Qt event queue into a member on MainWindow. Moving move only types like unique pointers got buggy so I changed on_build_complete() to accept std::shared_ptr<aiws::ProcessingCore>. This kept ownership transfer safe while fitting Qt's queued event system cleanly. I also kept MainWindow holding processing core directly as a value member rather than managing pointer dereferencing or reset calls.
+**5. Design decisions**
+A user may request a build during a build. BuildingState::on_build_requested() calls canel_build_job() to kill the running or queued build and start_build_job() to queue the newest workspace snapshot. When a remote add arrives during a build, add_document_file() increments current_generation_ and BuildingState::on_document_added() calls cancel_build_job(). This transitions immediately to NotBuiltState(true) with rebuild required. The smallest shared data my threads must share is BuildCoordinator with mutex, cv, job_generation, build_delay_ms, has_job, shutdown, and cancel_requested, and current_generation_. This is because no smaller set of data can pass workspace snapshots, wake or stop the worker thread without polling, and stop queued or active builds safely.
 
-**CR-1 Impact**
+**6. Fault switches**
+AIWS_FAULT_NO_CANCEL in MainWindow::worker_loop() skips checking coord_.cancel_requested and is caught in testing by test_cancel_mid_build() with elapsed_ms<600. AIWS_FAULT_SILENT_SHUTDOWN in MainWindow::stopworker() omits coord_.cv.notify_all() and is caught in the tests by timing out on the MainWindow destructor.
 
-CR-1 added external document ingestion using POSIX Unix domain stream sockets. In MainWindow, I added set_ipc_socket_path(), start_ipc_server(), stop_ipc_server(), and ipc_server_loop() to manage the socket lifecycle on a seperate thread to keep socket handling off the GUI thread.
+**AI disclosure**
+no ai was used in this project.
 
-tools/aiws_send was created as a binary to parse --socket and add arguments, connect to the socket with connection retries and read/write timeouts, and handle message framing. The wire protocol is length prefixed. The client sends a 4-byte network endien integer (htonl) for the path length followed by the UTF-8 file path bytes. Th server reads this on the worker thread and cheks if the file exists and is readable. It then replies immediately without waiting for the GUI thread. The response format is 1-byte status (0 for success and 1 for failure) followed by a 4 bute network endian integer for the error messegae length with the error string attached. If it is valid the document addition is queued to the GUI thread with QMetaObject::invokeMethod with Qt::QueuedConnection. The rest of the app remained untouched because IPC rputes through add_document_file() reuisng the existing document addition and corpus invalidation flow.
-
-**Fault Switches**
-
-Both fault macros were placed in on_build_completed() which evaluates completion lgoic to satisfy the section 6 requirements. AIWS_FAULT_ACCEPT_STALE surrounds the generation validation check. When it is defined, the stale build bypasses the guard and overwrites the newer workspace stats which violates R2. This fault is detected by test_stale_build_dropped(). This triggers an intervening workspace mutation and asserts that the UI label never displays "Ready - " for a stale generation. AIWS_FAUL_LOSE_FAILURE arrounds the failure dispatch pathway. When this is defined, the build errors are ignored and the UI is permanently left in the building state violating R3. This is detected by test_build_failure_delivered(). This injects a failed build and verifies that the status label updates to "Build failed".
-
-**AI Disclosure**
-
-Gemini was used slightly to debug my code. My test cases were having issues passing. I origionally used QDebug in test_reject_missing_file and QVerify(!client.readAllStandardError().isEmpty()) falsely returned the test as failed. 
-
-
-
-**Pair Programming Log**
-Partners Name: Res Sharpe
-Date: 11/05/2026
-
-* Turn 1 (partner drives - his code) 12:47 - 1:02- Res read over m4 requirements, Res coded bool MainWindow::add_document_file() in mainWindow.cpp. I helped guide Res on his implementation and gave feedback on how to properly edit void MainWindow::add_document() to meet project requirements.
-* Turn 2 (driving - his code) 1:02 - 1:17 - I began outlining a default socket path in aiws_send.cpp and worked with Res on editing his header file to account for a thread based design.
-* Turn 3 (partner drives - my code) 1:17-1:32 - Res looked over my aiws_send.cpp and looked at architecture and possible bug concerns. I was not able to give any real feedback because he did not edit my code, I mostly explained how the coded worked to him.
-* Turn 4 (driving - his code) 1:32- 1:47 - I started building a test case, void StudentTests::valid_file_and_relative_path(), to test CR-1 implementation. Res gave feedback on ways to test.
-
-Comments: This assignment was difficult as my partner agreed to meet and work on it before starting his own m4 project. With that being said, he was still helpful in implementing tests for CR-1, and I believe I was helpful in his understanding of CR-1 as a whole. We worked best when we both thought out loud and treated the assignment as both of us working on the same code with the same responsibility, except one person was just typing.

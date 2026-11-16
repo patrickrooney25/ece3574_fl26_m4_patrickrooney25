@@ -354,7 +354,9 @@ void MainWindow::start_build_job(){
 }
 
 void MainWindow::cancel_build_job(){
-    cancel_active_build();
+    std::lock_guard<std::mutex> lock(coord_.mutex);
+    coord_.has_job=false;
+    coord_.cancel_requested.store(true);
 }
 
 void MainWindow::apply_built_core(std::shared_ptr<aiws::ProcessingCore> new_core){
