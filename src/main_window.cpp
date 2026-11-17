@@ -344,6 +344,7 @@ void MainWindow::start_build_job(){
         coord_.pending_workspace=std::move(snapshot);
         coord_.job_generation = build_gen;
         coord_.build_delay_ms = delay;
+        coord_.cancel_requested.store(false);
         coord_.has_job=true;
     }
     coord_.cv.notify_one();
@@ -428,7 +429,6 @@ void MainWindow::worker_loop(){
             gen =coord_.job_generation;
             delay= coord_.build_delay_ms;
             coord_.has_job=false;
-            coord_.cancel_requested.store(false);
         }
 
         auto core= std::make_shared<aiws::ProcessingCore>();
@@ -486,6 +486,11 @@ void MainWindow::worker_loop(){
         }
         
     }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event){
+    cancel_build_job();
+    QMainWindow::closeEvent(event);
 }
 
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <QCloseEvent>
 #include <thread>
 #include <atomic>
 #include <memory>
@@ -191,6 +192,7 @@ private:
     void worker_loop();
     void cancel_active_build();
     void stop_worker();
+    void closeEvent(QCloseEvent* event) override;
 
     Workspace workspace_;
     ProcessingCore processing_core_;
