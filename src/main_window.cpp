@@ -440,6 +440,7 @@ void MainWindow::worker_loop(){
             const auto& docs = ws.documents();
 
             for(std::size_t i=0; i<docs.size(); ++i){
+                std::unique_lock<std::mutex> lock(coord_.mutex);
 #ifndef AIWS_FAULT_NO_CANCEL
                 if(coord_.cancel_requested.load()||coord_.shutdown){
                     cancelled=true;
@@ -447,7 +448,18 @@ void MainWindow::worker_loop(){
                 }
 #endif
                 if(delay>0){
+#ifndef AIWS_FAULT_NO_CANCEL
+                    coord_.cv.wait_for(lock, std::chrono::milliseconds(delay), [this](){
+                        return coord_.cancel_requested.load()||coord_.shutdown;
+                    });
+                    if(coord_.cancel_requested.load()|| coord_.shutdown){
+                        cancelled=true;
+                        break;
+                    }
+#else
+                    lock.unlock();
                     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+#endif
                 }
             }
 
