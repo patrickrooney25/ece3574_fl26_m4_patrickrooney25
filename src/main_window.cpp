@@ -300,14 +300,14 @@ void MainWindow::reset_application() {
 }
 
 void MainWindow::exit_application() {
+    if(exit_callback_!=nullptr){
+        exit_callback_(this);
+        return;
+    }
+    
     auto reply = QMessageBox::question(this, "Exit", "Are you sure you want to exit?");
     if(reply== QMessageBox::Yes) {
-        if(exit_callback_!=nullptr) {
-            exit_callback_(this);
-        }
-        else{
-            close();
-        }
+        close();
     }
 }
 
@@ -462,11 +462,17 @@ void MainWindow::worker_loop(){
             err_msg = "Unknown error during rebuild";
         }
 
-        //post result only if build wasn't cancelled
-        if (!cancelled){
-            QMetaObject::invokeMethod(this, [this, core=std::move(core), gen, success, err_msg]() mutable{
-                this->on_build_completed(std::move(core), gen, success, err_msg);}, Qt::QueuedConnection);            
+        //post result only if build wasn't cancelled or shutting down
+        bool shutting_down =false;
+        {
+            std::lock_guard<std::mutex> lock(coord_.mutex);
+            shutting_down = coord_.shutdown;
         }
+        if(!cancelled&&!shutting_down){
+            QMetaObject::invokeMethod(this, [this,core=std::move(core), gen, success, err_msg]() mutable{
+                this->on_build_completed(std::move(core), gen, success, err_msg);}, Qt::QueuedConnection);
+        }
+        
     }
 }
 
