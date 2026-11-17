@@ -304,11 +304,7 @@ void MainWindow::exit_application() {
         exit_callback_(this);
         return;
     }
-    
-    auto reply = QMessageBox::question(this, "Exit", "Are you sure you want to exit?");
-    if(reply== QMessageBox::Yes) {
-        close();
-    }
+    close();
 }
 
 void MainWindow::update_action_states() {
@@ -442,12 +438,8 @@ void MainWindow::worker_loop(){
 
         try {
             const auto& docs = ws.documents();
+
             for(std::size_t i=0; i<docs.size(); ++i){
-                std::unique_lock<std::mutex> lock(coord_.mutex);
-                if(coord_.shutdown){
-                    cancelled=true;
-                    break;
-                }
 #ifndef AIWS_FAULT_NO_CANCEL
                 if(coord_.cancel_requested.load()||coord_.shutdown){
                     cancelled=true;
@@ -455,23 +447,7 @@ void MainWindow::worker_loop(){
                 }
 #endif
                 if(delay>0){
-                    coord_.cv.wait_for(lock, std::chrono::milliseconds(delay), [this](){
-#ifndef AIWS_FAULT_NO_CANCEL
-                        return coord_.cancel_requested.load() || coord_.shutdown;
-#else
-                        return coord_.shutdown;
-#endif
-                    });
-                    if(coord_.shutdown){
-                        cancelled=true;
-                        break;
-                    }
-#ifndef AIWS_FAULT_NO_CANCEL
-                    if(coord_.cancel_requested.load()||coord_.shutdown){
-                        cancelled=true;
-                        break;
-                    }
-#endif
+                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
                 }
             }
 
