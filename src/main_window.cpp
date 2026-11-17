@@ -354,9 +354,12 @@ void MainWindow::start_build_job(){
 }
 
 void MainWindow::cancel_build_job(){
+    {
     std::lock_guard<std::mutex> lock(coord_.mutex);
     coord_.has_job=false;
     coord_.cancel_requested.store(true);
+    }
+    coord_.cv.notify_all();
 }
 
 void MainWindow::apply_built_core(std::shared_ptr<aiws::ProcessingCore> new_core){
@@ -440,6 +443,11 @@ void MainWindow::worker_loop(){
         try {
             const auto& docs = ws.documents();
             for(std::size_t i=0; i<docs.size(); ++i){
+                std::unique_lock<std::mutex> lock(coord_.mutex);
+                if(coord_.shutdown){
+                    cancelled=true;
+                    break;
+                }
 #ifndef AIWS_FAULT_NO_CANCEL
                 if(coord_.cancel_requested.load()||coord_.shutdown){
                     cancelled=true;
@@ -447,7 +455,23 @@ void MainWindow::worker_loop(){
                 }
 #endif
                 if(delay>0){
-                    std::this_thread::sleep_for(std::chrono::milliseconds(delay));
+                    coord_.cv.wait_for(lock, std::chrono::milliseconds(delay), [this](){
+#ifndef AIWS_FAULT_NO_CANCEL
+                        return coord_.cancel_requested.load() || coord_.shutdown;
+#else
+                        return coord_.shutdown;
+#endif
+                    });
+                    if(coord_.shutdown){
+                        cancelled=true;
+                        break;
+                    }
+#ifndef AIWS_FAULT_NO_CANCEL
+                    if(coord_.cancel_requested.load()||coord_.shutdown){
+                        cancelled=true;
+                        break;
+                    }
+#endif
                 }
             }
 
