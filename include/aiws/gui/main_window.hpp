@@ -190,7 +190,6 @@ private:
     void ipc_server_loop();
 
     void worker_loop();
-    void cancel_active_build();
     void stop_worker();
     void closeEvent(QCloseEvent* event) override;
 

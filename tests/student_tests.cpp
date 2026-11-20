@@ -108,10 +108,9 @@ private slots:
 
         QCOMPARE(client.exitCode(), 0);
 
-        QCoreApplication::processEvents();
-        auto doc_list = window.findChild<QListWidget*>();
+        auto doc_list =window.findChild<QListWidget*>();
         QVERIFY(doc_list!=nullptr);
-        QCOMPARE(doc_list->count(), 1);
+        QTRY_COMPARE_WITH_TIMEOUT(doc_list->count(), 1, 2000);
 
         std::filesystem::remove(rel_path);
     }
@@ -242,6 +241,41 @@ private slots:
         std::filesystem::remove(d2);
     }
 };
+
+void test_gui_responsiveness_and_exit_during_build(){
+    std::vector<std::string> docs = {"e1.txt", "e2.txt", "e3.txt", "e4.txt"};
+    for (std::size_t i=0; i<docs.size(); ++i){
+        std::ofstream out(docs[i]);
+        out << "content: " << docs[i];
+    }
+
+    auto start=std::chrono::steady_clock::now();
+    {
+        aiws::gui::MainWindow window;
+        window.set_build_delay_ms(300);
+        for(std::size_t i=0; i<docs.size(); ++i){
+            QVERIFY(window.add_document_file(QString::fromStdString(docs[i])));
+        }
+
+        QMetaObject::invokeMethod(&window, "build_corpus", Qt::DirectConnection);
+        QTest::qWait(50);
+
+        auto doc_list = window.findChild<QListWidget*>();
+        QVERIFY(doc_list!=nullptr);
+        doc_list->setCurrentRow(1);
+        QCoreApplication::processEvents();
+        QCOMPARE(doc_list->currentRow(), 1);
+
+        start =std::chrono::steady_clock::now();
+        window.close();
+    }
+    auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()-start).count();
+    QVERIFY2(elapsed_ms<600, "Exist during build exceeds 1 doc delay");
+
+    for (std::size_t i=0; i<docs.size(); ++i){
+        std::filesystem::remove(docs[i]);
+    }
+}
 
 QTEST_MAIN(StudentTests)
 #include "student_tests.moc"

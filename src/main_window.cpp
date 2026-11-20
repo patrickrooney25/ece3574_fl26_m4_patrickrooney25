@@ -392,10 +392,6 @@ void MainWindow::perform_reset(){
     transition_to(std::make_unique<NotBuiltState>(false));
 }
 
-void MainWindow::cancel_active_build(){
-    coord_.cancel_requested.store(true);
-}
-
 void MainWindow::stop_worker(){
     {
         std::lock_guard<std::mutex> lock(coord_.mutex);
@@ -489,7 +485,8 @@ void MainWindow::worker_loop(){
 }
 
 void MainWindow::closeEvent(QCloseEvent* event){
-    cancel_build_job();
+    stop_worker();
+    stop_ipc_server();
     QMainWindow::closeEvent(event);
 }
 
