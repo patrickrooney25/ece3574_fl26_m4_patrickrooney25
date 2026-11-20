@@ -190,6 +190,7 @@ void MainWindow::add_document() {
     workspace_widget_->add_document(QString::fromStdString(doc_id));
     current_generation_++;
     state_->on_document_added(*this);
+    update_action_states();
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
 }
 
@@ -213,6 +214,7 @@ bool MainWindow::add_document_file(const QString& path){
     workspace_widget_->add_document(QString::fromStdString(doc_id));
     current_generation_++;
     state_->on_document_added(*this);
+    update_action_states();
     status_label_->setText("Added document: " +QString::fromStdString(doc_id));
     return true;
 }
@@ -335,6 +337,7 @@ void MainWindow::transition_to(std::unique_ptr<CorpusState> next_state){
 }
 
 void MainWindow::start_build_job(){
+    //captures gen and workspace on GUI thread without blocking
     const uint64_t build_gen= current_generation_.load();
     Workspace snapshot =workspace_;
     const int delay = build_delay_ms_;
@@ -345,6 +348,7 @@ void MainWindow::start_build_job(){
         coord_.job_generation = build_gen;
         coord_.build_delay_ms = delay;
         coord_.cancel_requested.store(false);
+        //overwrite unstarted job
         coord_.has_job=true;
     }
     coord_.cv.notify_one();
@@ -353,7 +357,9 @@ void MainWindow::start_build_job(){
 void MainWindow::cancel_build_job(){
     {
     std::lock_guard<std::mutex> lock(coord_.mutex);
+    //drop queued job
     coord_.has_job=false;
+    //interrupt any activ build wait
     coord_.cancel_requested.store(true);
     }
     coord_.cv.notify_all();
@@ -398,6 +404,7 @@ void MainWindow::stop_worker(){
         coord_.shutdown=true;
         coord_.cancel_requested.store(true);
 #ifndef AIWS_FAULT_SILENT_SHUTDOWN
+        //wake worker loop so destructor doesnt hang
         coord_.cv.notify_all();
 #endif
     }
@@ -412,6 +419,7 @@ void MainWindow::worker_loop(){
         uint64_t gen=0;
         int delay=0;
         {
+            //sleep on cv until build job queued or shutdown requested
             std::unique_lock<std::mutex> lock(coord_.mutex);
             coord_.cv.wait(lock, [this](){
                 return coord_.shutdown || coord_.has_job;
@@ -420,7 +428,7 @@ void MainWindow::worker_loop(){
                 return;
             }
 
-            //hand off queued job
+            //claim latest snapshot
             ws =std::move(coord_.pending_workspace);
             gen =coord_.job_generation;
             delay= coord_.build_delay_ms;
@@ -435,6 +443,7 @@ void MainWindow::worker_loop(){
         try {
             const auto& docs = ws.documents();
 
+            //sim build work while checking for early cancellation
             for(std::size_t i=0; i<docs.size(); ++i){
                 std::unique_lock<std::mutex> lock(coord_.mutex);
 #ifndef AIWS_FAULT_NO_CANCEL
@@ -445,6 +454,7 @@ void MainWindow::worker_loop(){
 #endif
                 if(delay>0){
 #ifndef AIWS_FAULT_NO_CANCEL
+                    // wait wakes within ms on cancel/shutdown
                     coord_.cv.wait_for(lock, std::chrono::milliseconds(delay), [this](){
                         return coord_.cancel_requested.load()||coord_.shutdown;
                     });
@@ -453,12 +463,14 @@ void MainWindow::worker_loop(){
                         break;
                     }
 #else
+                    //ignore cancellation and sleep full build delay
                     lock.unlock();
                     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
 #endif
                 }
             }
 
+            //builds core off the GUI thread
             if(!cancelled){
                 core->rebuild(ws);
             }
@@ -485,6 +497,7 @@ void MainWindow::worker_loop(){
 }
 
 void MainWindow::closeEvent(QCloseEvent* event){
+    //cancel any build as soon as window closes
     stop_worker();
     stop_ipc_server();
     QMainWindow::closeEvent(event);

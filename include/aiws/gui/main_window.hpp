@@ -152,6 +152,7 @@ private slots:
 
 private:
 
+    //shared sync state between GUI thread and single build worker thread
     struct BuildCoordinator {
         std::mutex mutex;
         std::condition_variable cv;

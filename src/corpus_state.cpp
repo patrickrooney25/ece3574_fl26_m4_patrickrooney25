@@ -13,6 +13,7 @@ NotBuiltState::NotBuiltState(bool rebuild_required)
     : rebuild_required_(rebuild_required){}
 
 void NotBuiltState::on_enter(MainWindow& window){
+    //check for invalid workspace from a new or reset one
     if(rebuild_required_){
         window.update_corpus_ui("Corpus: <b>Rebuild Required</b>", QString(), true);
     }
@@ -22,6 +23,7 @@ void NotBuiltState::on_enter(MainWindow& window){
 }
 
 void NotBuiltState::on_build_requested(MainWindow& window){
+    //move to buildingstate then hand off workspace snapshot to worker
     window.transition_to(std::make_unique<BuildingState>());
     window.start_build_job();
 }
@@ -50,6 +52,7 @@ void BuildingState::on_reset(MainWindow& window){
 }
 
 void BuildingState::on_build_completed(MainWindow& window, std::shared_ptr<ProcessingCore> core, uint64_t gen, bool success, const QString& err){
+    //check gen first so stale completions ignored
     if(gen!=window.current_generation()){
         return;
     }
@@ -57,6 +60,8 @@ void BuildingState::on_build_completed(MainWindow& window, std::shared_ptr<Proce
         window.transition_to(std::make_unique<BuildFailedState>(err));
         return;
     }
+
+    //install new core and enable actions
     window.apply_built_core(std::move(core));
     window.transition_to(std::make_unique<ReadyState>());
 }
@@ -67,6 +72,7 @@ void ReadyState::on_enter(MainWindow& window){
 }
 
 void ReadyState::on_document_added(MainWindow& window){
+    //workspace edit invalidates corpus
     window.transition_to(std::make_unique<NotBuiltState>(true));
 }
 
